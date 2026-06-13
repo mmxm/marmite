@@ -1158,14 +1158,8 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
 }
 
-.form-row-ingredient .qty-input {
-  width: 80px;
-  flex-shrink: 0;
-}
-
-.form-row-ingredient .unit-input {
-  width: 100px;
-  flex-shrink: 0;
+.form-row-ingredient input {
+  flex: 1;
 }
 
 .form-list-ordered {

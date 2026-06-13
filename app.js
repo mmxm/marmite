@@ -41,15 +41,18 @@ const app = {
     // Initial Route
     this.navigate('catalog');
     
-    // Check if configuration exists
-    if (!state.config.googleClientId || !state.config.geminiApiKey) {
-      this.showToast('Veuillez configurer vos clés API dans les paramètres', 'warning');
+    // Try to load cached recipes first
+    this.loadCachedRecipes();
+    
+    // Check if Google Drive is configured (needs client ID)
+    if (!state.config.googleClientId) {
+      this.showToast('Veuillez renseigner votre Google Client ID dans les paramètres', 'warning');
       this.navigate('settings');
     } else {
-      // Try to load cached recipes first
-      this.loadCachedRecipes();
       if (this.isUserConnected()) {
         await this.syncData();
+      } else {
+        this.showToast('Google Drive non connecté. Session expirée ou non démarrée.', 'info');
       }
     }
     this.hideLoader();
@@ -864,14 +867,24 @@ const app = {
     const row = document.createElement('div');
     row.className = 'form-row-ingredient';
     
-    const name = data ? data.name : '';
-    const qty = data && data.quantity !== null && data.quantity !== undefined ? data.quantity : '';
-    const unit = data ? data.unit : '';
+    let text = '';
+    if (data) {
+      const parts = [];
+      if (data.quantity !== null && data.quantity !== undefined) parts.push(data.quantity);
+      if (data.unit) {
+        const isShortUnit = ['g', 'cl', 'ml', 'g.', 'cl.', 'ml.'].includes(data.unit.toLowerCase());
+        if (isShortUnit && data.quantity !== null && data.quantity !== undefined) {
+          parts[0] = parts[0] + data.unit;
+        } else {
+          parts.push(data.unit);
+        }
+      }
+      if (data.name) parts.push(data.name);
+      text = parts.join(' ');
+    }
     
     row.innerHTML = `
-      <input type="number" step="any" placeholder="Qté" class="qty-input" value="${qty}">
-      <input type="text" placeholder="Unité (ex: g, cl)" class="unit-input" value="${unit}">
-      <input type="text" placeholder="Ingrédient (ex: Farine)" class="name-input" value="${name}" required>
+      <input type="text" placeholder="Ex: 250g de farine" class="ingredient-input" value="${text}" required>
       <button type="button" class="btn-icon" onclick="this.parentElement.remove()" title="Supprimer">
         <i class="fa-solid fa-trash text-primary"></i>
       </button>
@@ -971,16 +984,10 @@ const app = {
     // Collect ingredients
     const ingredients = [];
     document.querySelectorAll('#form-ingredients-list .form-row-ingredient').forEach(row => {
-      const name = row.querySelector('.name-input').value.trim();
-      const qtyVal = row.querySelector('.qty-input').value.trim();
-      const unit = row.querySelector('.unit-input').value.trim();
-      
-      if (name) {
-        ingredients.push({
-          name: name,
-          quantity: qtyVal ? parseFloat(qtyVal) : null,
-          unit: unit
-        });
+      const textVal = row.querySelector('.ingredient-input').value.trim();
+      if (textVal) {
+        const parsed = this.parseIngredientText(textVal);
+        ingredients.push(parsed);
       }
     });
 
@@ -1214,38 +1221,69 @@ const app = {
       
       const rawHtml = data.contents;
       
-      // Clean HTML to save tokens
-      this.showAiLoading('Nettoyage du texte et envoi à Gemini...');
-      const cleanedText = this.cleanHtmlForAi(rawHtml);
+      // Try parsing with JSON-LD Schema first (Mealie parser style)
+      this.showAiLoading('Recherche de métadonnées structurées...');
+      let parsedRecipe = this.parseRecipeSchema(rawHtml);
       
-      // 2. Call Gemini
-      const prompt = `Tu es un assistant de cuisine expert. Analyse le texte brut suivant extrait d'un site internet de cuisine, et structure la recette sous forme de JSON correspondant à ce schéma précis :
-      {
-        "title": "Titre court",
-        "description": "Explication courte",
-        "prepTime": 15,
-        "cookTime": 30,
-        "servings": 4,
-        "category": "Entrée|Plat|Dessert|Apéritif|Boisson|Autre",
-        "tags": ["tag1", "tag2"],
-        "ingredients": [{"name": "Nom ingrédient", "quantity": 1.5, "unit": "g|kg|l|cl|ml|cuillère à soupe|sachet|unité|pincée"}],
-        "steps": ["Étape 1...", "Étape 2..."]
-      }
-      Réponds uniquement avec le JSON. Voici le texte brut : \n\n${cleanedText}`;
-
-      const payload = {
-        contents: [
-          {
-            parts: [{ text: prompt }]
+      if (parsedRecipe) {
+        this.applyImportedRecipe(parsedRecipe);
+        
+        // Try to fetch cover image if present
+        if (parsedRecipe.imageUrl) {
+          this.showAiLoading('Téléchargement de la photo de la recette...');
+          try {
+            const rawImageResp = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(parsedRecipe.imageUrl)}`);
+            if (rawImageResp.ok) {
+              const imgBlob = await rawImageResp.blob();
+              this.compressAndResizeImage(imgBlob, (resizedBlob) => {
+                state.selectedImageBlob = resizedBlob;
+                document.getElementById('form-image-preview').src = URL.createObjectURL(resizedBlob);
+              });
+            }
+          } catch (imgErr) {
+            console.warn('Failed to fetch recipe image', imgErr);
           }
-        ]
-      };
+        }
+        
+        this.showToast('Recette importée via Métadonnées (sans IA) !', 'success');
+        document.getElementById('wizard-url-input').value = '';
+      } else {
+        // Fallback to Gemini AI
+        if (!state.config.geminiApiKey) {
+          throw new Error('Aucune métadonnée structurée trouvée sur ce site. Veuillez configurer une clé d\'API Gemini dans les paramètres pour activer l\'analyse par IA.');
+        }
+        
+        this.showAiLoading('Analyse de la page par Gemini...');
+        const cleanedText = this.cleanHtmlForAi(rawHtml);
+        
+        const prompt = `Tu es un assistant de cuisine expert. Analyse le texte brut suivant extrait d'un site internet de cuisine, et structure la recette sous forme de JSON correspondant à ce schéma précis :
+        {
+          "title": "Titre court",
+          "description": "Explication courte",
+          "prepTime": 15,
+          "cookTime": 30,
+          "servings": 4,
+          "category": "Entrée|Plat|Dessert|Apéritif|Boisson|Autre",
+          "tags": ["tag1", "tag2"],
+          "ingredients": [{"name": "Nom ingrédient", "quantity": 1.5, "unit": "g|kg|l|cl|ml|cuillère à soupe|sachet|unité|pincée"}],
+          "steps": ["Étape 1...", "Étape 2..."]
+        }
+        Réponds uniquement avec le JSON. Voici le texte brut : \n\n${cleanedText}`;
 
-      const parsedRecipe = await this.callGeminiApi(payload);
-      this.applyImportedRecipe(parsedRecipe);
-      
-      this.showToast('Recette importée avec succès !', 'success');
-      document.getElementById('wizard-url-input').value = '';
+        const payload = {
+          contents: [
+            {
+              parts: [{ text: prompt }]
+            }
+          ]
+        };
+
+        const parsedRecipe = await this.callGeminiApi(payload);
+        this.applyImportedRecipe(parsedRecipe);
+        
+        this.showToast('Recette importée via IA Gemini !', 'success');
+        document.getElementById('wizard-url-input').value = '';
+      }
     } catch (err) {
       console.error(err);
       this.showToast(`Échec de l'import : ${err.message}`, 'error');
@@ -1276,6 +1314,201 @@ const app = {
     }
     
     return bodyText;
+  },
+
+  parseRecipeSchema(html) {
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const jsonLdScripts = doc.querySelectorAll('script[type="application/ld+json"]');
+      
+      let recipeSchema = null;
+      
+      for (const script of jsonLdScripts) {
+        try {
+          const data = JSON.parse(script.textContent);
+          
+          const searchForRecipe = (obj) => {
+            if (!obj) return null;
+            if (obj['@type'] === 'Recipe' || (Array.isArray(obj['@type']) && obj['@type'].includes('Recipe'))) return obj;
+            if (Array.isArray(obj)) {
+              for (const item of obj) {
+                const r = searchForRecipe(item);
+                if (r) return r;
+              }
+            }
+            if (obj['@graph'] && Array.isArray(obj['@graph'])) {
+              for (const item of obj['@graph']) {
+                const r = searchForRecipe(item);
+                if (r) return r;
+              }
+            }
+            return null;
+          };
+          
+          recipeSchema = searchForRecipe(data);
+          if (recipeSchema) break;
+        } catch (e) {
+          console.warn('Error parsing JSON-LD script', e);
+        }
+      }
+      
+      if (!recipeSchema) return null;
+      
+      // Extract and clean fields
+      const title = recipeSchema.name || '';
+      const description = recipeSchema.description || '';
+      
+      const parseISO8601Duration = (durationStr) => {
+        if (!durationStr) return 0;
+        const match = durationStr.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
+        if (!match) return 0;
+        const hours = parseInt(match[1] || 0);
+        const minutes = parseInt(match[2] || 0);
+        return hours * 60 + minutes;
+      };
+      
+      const prepTime = parseISO8601Duration(recipeSchema.prepTime);
+      const cookTime = parseISO8601Duration(recipeSchema.cookTime);
+      
+      let servings = 4;
+      if (recipeSchema.recipeYield) {
+        const yieldStr = String(recipeSchema.recipeYield);
+        const numMatch = yieldStr.match(/\d+/);
+        if (numMatch) servings = parseInt(numMatch[0]);
+      }
+      
+      let category = 'Plat';
+      if (recipeSchema.recipeCategory) {
+        const catStr = Array.isArray(recipeSchema.recipeCategory) 
+          ? recipeSchema.recipeCategory[0] 
+          : recipeSchema.recipeCategory;
+        if (catStr.toLowerCase().includes('entr')) category = 'Entrée';
+        else if (catStr.toLowerCase().includes('dessert')) category = 'Dessert';
+        else if (catStr.toLowerCase().includes('boiss')) category = 'Boisson';
+        else if (catStr.toLowerCase().includes('apér')) category = 'Apéritif';
+        else category = 'Plat';
+      }
+        
+      const tags = [];
+      if (recipeSchema.keywords) {
+        const kw = recipeSchema.keywords;
+        if (typeof kw === 'string') {
+          tags.push(...kw.split(',').map(s => s.trim()));
+        } else if (Array.isArray(kw)) {
+          tags.push(...kw.map(s => String(s).trim()));
+        }
+      }
+      
+      const rawIngredients = recipeSchema.recipeIngredient || [];
+      const ingredients = rawIngredients.map(ingText => this.parseIngredientText(ingText));
+      
+      let steps = [];
+      if (recipeSchema.recipeInstructions) {
+        const inst = recipeSchema.recipeInstructions;
+        if (Array.isArray(inst)) {
+          steps = inst.map(stepObj => {
+            if (typeof stepObj === 'string') return stepObj;
+            if (stepObj.text) return stepObj.text;
+            if (stepObj.itemListElement && Array.isArray(stepObj.itemListElement)) {
+              return stepObj.itemListElement.map(el => el.text || '').filter(t => t);
+            }
+            return '';
+          }).flat().filter(t => t);
+        } else if (typeof inst === 'string') {
+          steps = inst.split('\n').map(s => s.trim()).filter(s => s);
+        }
+      }
+      
+      let imageUrl = '';
+      if (recipeSchema.image) {
+        if (typeof recipeSchema.image === 'string') {
+          imageUrl = recipeSchema.image;
+        } else if (Array.isArray(recipeSchema.image)) {
+          imageUrl = recipeSchema.image[0];
+        } else if (recipeSchema.image.url) {
+          imageUrl = recipeSchema.image.url;
+        }
+      }
+      
+      return {
+        title,
+        description,
+        prepTime,
+        cookTime,
+        servings,
+        category,
+        tags,
+        ingredients,
+        steps,
+        imageUrl
+      };
+    } catch (err) {
+      console.warn('Failed to extract schema metadata', err);
+      return null;
+    }
+  },
+
+  parseIngredientText(text) {
+    text = text.trim();
+    let quantity = null;
+    let unit = '';
+    let name = '';
+    
+    // 1. Try to match standard fraction or decimal at the start
+    // Matches "1", "1.5", "1/2", "3/4"
+    const numRegex = /^(\d+[\/\.]\d+|\d+)\s*/;
+    const match = text.match(numRegex);
+    if (match) {
+      let qtyStr = match[1];
+      if (qtyStr.includes('/')) {
+        const parts = qtyStr.split('/');
+        quantity = parseFloat(parts[0]) / parseFloat(parts[1]);
+      } else {
+        quantity = parseFloat(qtyStr);
+      }
+      text = text.substring(match[0].length).trim();
+    }
+    
+    // 2. Check for common units
+    const units = [
+      'g', 'kg', 'ml', 'cl', 'l', 'dl', 'g.', 'kg.', 'ml.', 'cl.', 'l.',
+      'cuillère à soupe', 'cuillères à soupe', 'c. à soupe', 'c. à s.', 'c.a.s.', 'cas',
+      'cuillère à café', 'cuillères à café', 'c. à café', 'c. à c.', 'c.a.c.', 'cac',
+      'sachet', 'sachets', 'pincée', 'pincées', 'gousse', 'gousses', 'tranche', 'tranches',
+      'tasse', 'tasses', 'verre', 'verres', 'pot', 'pots', 'boite', 'boites', 'boîte', 'boîtes',
+      'feuille', 'feuilles', 'brin', 'brins', 'filet', 'filets', 'morceau', 'morceaux',
+      'brique', 'briques', 'goutte', 'gouttes'
+    ];
+    
+    units.sort((a, b) => b.length - a.length);
+    
+    let foundUnit = false;
+    for (const u of units) {
+      const unitRegex = new RegExp(`^(${u})\\b\\s*(?:de\\s+|d'\\s*)?`, 'i');
+      const unitMatch = text.match(unitRegex);
+      if (unitMatch) {
+        unit = unitMatch[1];
+        text = text.substring(unitMatch[0].length).trim();
+        foundUnit = true;
+        break;
+      }
+    }
+    
+    if (!foundUnit) {
+      const deMatch = text.match(/^(?:de\s+|d'\s*)/i);
+      if (deMatch) {
+        text = text.substring(deMatch[0].length).trim();
+      }
+    }
+    
+    name = text;
+    
+    return {
+      quantity: quantity,
+      unit: unit,
+      name: name
+    };
   },
 
   applyImportedRecipe(recipe) {
