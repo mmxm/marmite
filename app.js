@@ -1048,6 +1048,7 @@ const app = {
       
       this.renderCatalog();
       this.openRecipeDetail(recipe.id);
+      this.hideLoader();
     } catch (err) {
       console.error(err);
       this.showToast(`Erreur lors de la sauvegarde : ${err.message}`, 'error');
