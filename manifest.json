@@ -1,0 +1,24 @@
+{
+  "short_name": "Marmite",
+  "name": "Marmite - Carnet de Recettes Intelligent",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#0c0a09",
+  "theme_color": "#ea580c",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "categories": ["food", "utilities"]
+}

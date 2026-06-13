@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Marmite - Carnet de Recettes Intelligent</title>
+  
+  <!-- SEO & PWA Meta -->
+  <meta name="description" content="Un carnet de recettes moderne avec import par IA et hébergé sur votre Google Drive.">
+  <meta name="theme-color" content="#ea580c">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome for Premium Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="index.css">
+</head>
+<body class="dark-theme"> <!-- Dark theme by default, modern and premium -->
+  
+  <!-- Global App Loading Overlay -->
+  <div id="app-loader" class="loader-overlay active">
+    <div class="loader-spinner"></div>
+    <p id="loader-text">Chargement de Marmite...</p>
+  </div>
+
+  <!-- Main Container -->
+  <main class="app-container">
+    
+    <!-- HEADER -->
+    <header class="app-header">
+      <div class="header-logo" onclick="app.navigate('catalog')">
+        <i class="fa-solid fa-fire-burner text-primary"></i>
+        <h1>Marmite</h1>
+      </div>
+      <div class="header-actions">
+        <button id="btn-sync" class="btn-icon" title="Synchroniser avec Google Drive" onclick="app.syncData()">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+        </button>
+        <button class="btn-icon" title="Paramètres" onclick="app.navigate('settings')">
+          <i class="fa-solid fa-gear"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- SECTION: CATALOG / LIST OF RECIPES -->
+    <section id="view-catalog" class="app-view active">
+      <div class="search-filter-container">
+        <!-- Search bar -->
+        <div class="search-bar">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input type="text" id="search-input" placeholder="Rechercher une recette ou un ingrédient..." oninput="app.filterRecipes()">
+          <button id="search-clear" class="btn-icon-clear hidden" onclick="app.clearSearch()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        
+        <!-- Category Pills Slider -->
+        <div class="categories-slider" id="categories-list">
+          <!-- Dynamically populated categories -->
+        </div>
+      </div>
+
+      <!-- Recipes Grid -->
+      <div class="recipes-grid" id="recipes-grid">
+        <!-- Dynamically populated recipe cards -->
+      </div>
+      
+      <!-- Empty State -->
+      <div id="catalog-empty-state" class="empty-state hidden">
+        <i class="fa-solid fa-utensils-slash"></i>
+        <h3>Aucune recette trouvée</h3>
+        <p>Ajoutez votre première recette manuellement ou à l'aide de l'import IA.</p>
+        <button class="btn btn-primary" onclick="app.openAddRecipeForm()">
+          <i class="fa-solid fa-plus"></i> Créer une recette
+        </button>
+      </div>
+
+      <!-- Floating Action Button -->
+      <button class="fab" onclick="app.openAddRecipeForm()" title="Ajouter une recette">
+        <i class="fa-solid fa-plus"></i>
+      </button>
+    </section>
+
+    <!-- SECTION: RECIPE DETAIL -->
+    <section id="view-detail" class="app-view">
+      <div class="detail-hero">
+        <button class="btn-back-hero" onclick="app.navigate('catalog')" title="Retour">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <div class="hero-actions">
+          <button id="btn-edit-recipe" class="btn-icon-hero" title="Modifier la recette">
+            <i class="fa-solid fa-pen-to-square"></i>
+          </button>
+          <button id="btn-delete-recipe" class="btn-icon-hero btn-delete" title="Supprimer la recette">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+        <img id="detail-image" src="" alt="Photo de la recette" class="hero-img">
+        <div class="hero-overlay"></div>
+      </div>
+
+      <div class="detail-body">
+        <div class="detail-header-info">
+          <h2 id="detail-title">Nom de la recette</h2>
+          <p id="detail-description" class="recipe-desc">Description de la recette...</p>
+          
+          <div class="detail-tags" id="detail-tags">
+            <!-- Tags dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Metadata Cards -->
+        <div class="metadata-grid">
+          <div class="meta-card">
+            <i class="fa-regular fa-clock"></i>
+            <span class="meta-label">Préparation</span>
+            <span class="meta-value" id="detail-prep-time">20 min</span>
+          </div>
+          <div class="meta-card">
+            <i class="fa-solid fa-fire"></i>
+            <span class="meta-label">Cuisson</span>
+            <span class="meta-value" id="detail-cook-time">30 min</span>
+          </div>
+          <div class="meta-card">
+            <i class="fa-solid fa-circle-info"></i>
+            <span class="meta-label">Catégorie</span>
+            <span class="meta-value" id="detail-category">Plat</span>
+          </div>
+        </div>
+
+        <!-- Portions Selector -->
+        <div class="portions-selector-container">
+          <span class="portions-label">Portions</span>
+          <div class="portions-controls">
+            <button class="btn-portion" onclick="app.changeServings(-1)">
+              <i class="fa-solid fa-minus"></i>
+            </button>
+            <span id="detail-servings-value" class="portions-value">4</span>
+            <button class="btn-portion" onclick="app.changeServings(1)">
+              <i class="fa-solid fa-plus"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="tabs-nav">
+          <button id="tab-btn-ingredients" class="tab-btn active" onclick="app.switchRecipeTab('ingredients')">
+            Ingrédients (<span id="detail-ingredients-count">0</span>)
+          </button>
+          <button id="tab-btn-steps" class="tab-btn" onclick="app.switchRecipeTab('steps')">
+            Préparation (<span id="detail-steps-count">0</span>)
+          </button>
+        </div>
+
+        <!-- TAB CONTENT: INGREDIENTS -->
+        <div id="tab-ingredients" class="tab-content active">
+          <ul class="ingredients-list" id="detail-ingredients-list">
+            <!-- Dynamically populated ingredients with checkboxes -->
+          </ul>
+        </div>
+
+        <!-- TAB CONTENT: STEPS (PREPARATION) -->
+        <div id="tab-steps" class="tab-content">
+          <!-- Cooking Mode Header -->
+          <div class="cooking-mode-header">
+            <span>Mode Cuisine</span>
+            <label class="switch">
+              <input type="checkbox" id="toggle-cooking-mode" onchange="app.toggleCookingMode()">
+              <span class="slider round"></span>
+            </label>
+          </div>
+          
+          <div class="steps-container" id="detail-steps-list">
+            <!-- Dynamically populated steps -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: FORM (ADD/EDIT RECIPE) -->
+    <section id="view-form" class="app-view">
+      <div class="form-header">
+        <button class="btn-icon" onclick="app.cancelForm()" title="Annuler">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <h2 id="form-view-title">Nouvelle Recette</h2>
+        <button class="btn-save" onclick="app.saveRecipe()" title="Enregistrer">
+          <i class="fa-solid fa-check"></i> Sauver
+        </button>
+      </div>
+
+      <div class="form-body">
+        <!-- AI Import Wizard (Only visible when creating a new recipe, not when editing) -->
+        <div id="ai-wizard-container" class="ai-wizard-card">
+          <div class="ai-wizard-header">
+            <i class="fa-solid fa-wand-magic-sparkles text-primary animate-pulse"></i>
+            <h3>Assistant d'Import IA</h3>
+          </div>
+          <p class="ai-wizard-desc">Importez automatiquement les ingrédients et étapes de votre recette en fournissant un lien ou une photo.</p>
+          
+          <div class="wizard-tabs">
+            <button id="wizard-tab-url" class="wizard-tab-btn active" onclick="app.switchWizardTab('url')">
+              <i class="fa-solid fa-link"></i> Par Lien Web
+            </button>
+            <button id="wizard-tab-photo" class="wizard-tab-btn" onclick="app.switchWizardTab('photo')">
+              <i class="fa-solid fa-camera"></i> Par Photo
+            </button>
+          </div>
+
+          <!-- Wizard URL Import Panel -->
+          <div id="wizard-panel-url" class="wizard-panel active">
+            <div class="input-group">
+              <input type="url" id="wizard-url-input" placeholder="https://www.exemple.com/recette-de-cuisine">
+              <button class="btn btn-primary" onclick="app.importRecipeFromUrl()">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Analyser le lien
+              </button>
+            </div>
+            <p class="input-hint">Note : L'importation lit le contenu du site via un proxy CORS.</p>
+          </div>
+
+          <!-- Wizard Photo Import Panel -->
+          <div id="wizard-panel-photo" class="wizard-panel">
+            <div class="photo-upload-zone">
+              <i class="fa-solid fa-file-image upload-icon"></i>
+              <p>Prenez une photo de votre livre ou cahier de recettes</p>
+              <label for="wizard-photo-file" class="btn btn-secondary">
+                <i class="fa-solid fa-camera"></i> Prendre / Choisir une photo
+              </label>
+              <input type="file" id="wizard-photo-file" accept="image/*" capture="environment" class="hidden" onchange="app.importRecipeFromPhoto(event)">
+            </div>
+          </div>
+          
+          <!-- AI Loading State -->
+          <div id="ai-loading" class="ai-loading hidden">
+            <div class="loader-spinner-small"></div>
+            <span id="ai-loading-text">Analyse en cours par Gemini...</span>
+          </div>
+        </div>
+
+        <!-- Form Fields -->
+        <form id="recipe-form" onsubmit="event.preventDefault();">
+          <input type="hidden" id="form-recipe-id">
+          
+          <!-- Recipe Image Upload -->
+          <div class="form-group image-upload-group">
+            <label>Photo de la Recette</label>
+            <div class="image-preview-container" onclick="document.getElementById('form-recipe-image-file').click()">
+              <img id="form-image-preview" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' width='100%25' height='100%25'><rect width='100%25' height='100%25' fill='%23292524'/><g fill='none' stroke='%23ea580c' stroke-width='6' stroke-linecap='round' stroke-linejoin='round' transform='translate(140, 90)'><path d='M 60 50 A 35 35 0 0 1 10 50 A 25 25 0 0 1 30 15 A 25 25 0 0 1 90 15 A 25 25 0 0 1 110 50 A 35 35 0 0 1 60 50 Z' /><path d='M 25 50 L 95 50 L 90 75 L 30 75 Z' /><path d='M 40 75 L 80 75 L 75 90 L 45 90 Z' /></g><text x='50%25' y='240' fill='%23a8a29e' font-family='\'Outfit\', sans-serif' font-size='16' font-weight='600' text-anchor='middle'>Aucune photo</text></svg>" alt="Aperçu" class="preview-img">
+              <div class="image-upload-overlay">
+                <i class="fa-solid fa-camera"></i>
+                <span>Changer la photo</span>
+              </div>
+            </div>
+            <input type="file" id="form-recipe-image-file" accept="image/*" class="hidden" onchange="app.previewImage(event)">
+          </div>
+
+          <!-- Title -->
+          <div class="form-group">
+            <label for="form-title">Nom de la recette <span class="required">*</span></label>
+            <input type="text" id="form-title" placeholder="Ex: Lasagnes à la bolognaise" required>
+          </div>
+
+          <!-- Description -->
+          <div class="form-group">
+            <label for="form-description">Description</label>
+            <textarea id="form-description" rows="3" placeholder="Description rapide de votre recette..."></textarea>
+          </div>
+
+          <!-- Category & Servings -->
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="form-category">Catégorie</label>
+              <select id="form-category">
+                <option value="Plat">Plat</option>
+                <option value="Entrée">Entrée</option>
+                <option value="Dessert">Dessert</option>
+                <option value="Apéritif">Apéritif</option>
+                <option value="Boisson">Boisson</option>
+                <option value="Autre">Autre</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="form-servings">Portions par défaut</label>
+              <input type="number" id="form-servings" min="1" value="4" required>
+            </div>
+          </div>
+
+          <!-- Prep & Cook Time -->
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="form-prep-time">Préparation (min)</label>
+              <input type="number" id="form-prep-time" min="0" value="15">
+            </div>
+            <div class="form-group">
+              <label for="form-cook-time">Cuisson (min)</label>
+              <input type="number" id="form-cook-time" min="0" value="30">
+            </div>
+          </div>
+
+          <!-- Tags -->
+          <div class="form-group">
+            <label for="form-tags">Tags (séparés par des virgules)</label>
+            <input type="text" id="form-tags" placeholder="Ex: Italien, Famille, Hiver">
+          </div>
+
+          <!-- Ingredients Editor -->
+          <div class="form-group">
+            <div class="section-title-action">
+              <label>Ingrédients</label>
+              <button type="button" class="btn-link" onclick="app.addFormIngredientRow()">
+                <i class="fa-solid fa-plus"></i> Ajouter un ingrédient
+              </button>
+            </div>
+            <div class="form-list-rows" id="form-ingredients-list">
+              <!-- Dynamically added rows -->
+            </div>
+          </div>
+
+          <!-- Steps Editor -->
+          <div class="form-group">
+            <div class="section-title-action">
+              <label>Étapes de préparation</label>
+              <button type="button" class="btn-link" onclick="app.addFormStepRow()">
+                <i class="fa-solid fa-plus"></i> Ajouter une étape
+              </button>
+            </div>
+            <ol class="form-list-ordered" id="form-steps-list">
+              <!-- Dynamically added steps -->
+            </ol>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- SECTION: SETTINGS -->
+    <section id="view-settings" class="app-view">
+      <div class="settings-header">
+        <button class="btn-icon" onclick="app.navigate('catalog')" title="Retour">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <h2>Configuration & Paramètres</h2>
+      </div>
+
+      <div class="settings-body">
+        <!-- Connection Card -->
+        <div class="settings-card">
+          <h3><i class="fa-solid fa-cloud"></i> Compte Google Drive</h3>
+          <p class="settings-desc">Toutes vos recettes et images sont enregistrées de manière privée sur votre espace Google Drive.</p>
+          
+          <div id="gdrive-status-disconnected" class="gdrive-status-box error">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>Google Drive non connecté</span>
+          </div>
+          <div id="gdrive-status-connected" class="gdrive-status-box success hidden">
+            <i class="fa-solid fa-circle-check"></i>
+            <div>
+              <strong>Connecté</strong>
+              <p id="gdrive-user-email">email@gmail.com</p>
+            </div>
+          </div>
+
+          <div class="settings-actions">
+            <button id="btn-gdrive-login" class="btn btn-primary" onclick="app.loginGoogleDrive()">
+              <i class="fa-brands fa-google"></i> Se connecter avec Google
+            </button>
+            <button id="btn-gdrive-logout" class="btn btn-secondary hidden" onclick="app.logoutGoogleDrive()">
+              <i class="fa-solid fa-right-from-bracket"></i> Se déconnecter
+            </button>
+          </div>
+        </div>
+
+        <!-- Google Drive Configuration -->
+        <div class="settings-card">
+          <h3><i class="fa-solid fa-gears"></i> Paramètres Google API</h3>
+          <p class="settings-desc">Saisissez votre Client ID Google OAuth. C'est nécessaire pour autoriser l'application à accéder à Google Drive.</p>
+          
+          <div class="form-group">
+            <label for="setting-client-id">Google Client ID</label>
+            <input type="text" id="setting-client-id" placeholder="Ex: xxxxxxx-xxxxxxx.apps.googleusercontent.com" onchange="app.saveSettings()">
+            <p class="input-hint">Nécessaire si vous hébergez vous-même l'application sur un autre domaine.</p>
+          </div>
+        </div>
+
+        <!-- Gemini AI configuration -->
+        <div class="settings-card">
+          <h3><i class="fa-solid fa-wand-magic-sparkles"></i> API Gemini (IA)</h3>
+          <p class="settings-desc">Saisissez votre clé d'API Gemini pour activer l'assistant d'import automatique par photo ou lien.</p>
+          
+          <div class="form-group">
+            <label for="setting-gemini-key">Clé d'API Gemini</label>
+            <div class="password-input-wrapper">
+              <input type="password" id="setting-gemini-key" placeholder="AIzaSy..." onchange="app.saveSettings()">
+              <button class="btn-toggle-password" onclick="app.togglePasswordVisibility('setting-gemini-key')">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+            <p class="input-hint">Votre clé est stockée uniquement en local sur votre appareil.</p>
+          </div>
+        </div>
+
+        <!-- App Storage Info -->
+        <div class="settings-card">
+          <h3><i class="fa-solid fa-database"></i> Cache et Données Locales</h3>
+          <p class="settings-desc">Informations sur les données enregistrées dans votre navigateur.</p>
+          <div class="data-stats">
+            <div>Recettes en cache local : <strong id="stats-local-count">0</strong></div>
+            <div>Dernière synchronisation : <strong id="stats-last-sync">Jamais</strong></div>
+          </div>
+          <div class="settings-actions">
+            <button class="btn btn-secondary" onclick="app.clearLocalCache()">
+              <i class="fa-solid fa-eraser"></i> Effacer le cache local
+            </button>
+          </div>
+        </div>
+
+        <!-- Version & Credits -->
+        <div class="settings-version">
+          <p>Marmite PWA v1.0.0</p>
+          <p>Créé par Antigravity • Sans Serveur</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="toast hidden">Message de notification</div>
+
+  <!-- Google SDKs -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://apis.google.com/js/api.js" async defer></script>
+  
+  <!-- App JavaScript -->
+  <script src="app.js"></script>
+</body>
+</html>
