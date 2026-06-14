@@ -1746,10 +1746,67 @@ input:checked + .slider:before {
    RESPONSIVE DESIGN EXTENSIONS (Mobile, Tablet, Desktop)
    ========================================================================== */
 
+/* Mobile fallback rules using display contents */
+.detail-col-left,
+.detail-col-right,
+.form-col-left,
+.form-col-right {
+  display: contents;
+}
+
+.detail-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-header-info {
+  order: 1;
+}
+
+.metadata-grid {
+  order: 2;
+}
+
+.portions-selector-container {
+  order: 3;
+}
+
+.tabs-nav {
+  order: 4;
+}
+
+#tab-ingredients,
+#tab-steps,
+#tab-gallery {
+  order: 5;
+}
+
 /* 1. Tablet screens (768px and up) */
 @media (min-width: 768px) {
   :root {
     --max-width: 768px;
+  }
+
+  /* Reset display contents to enable grid columns on tablet/desktop */
+  .detail-col-left,
+  .detail-col-right,
+  .form-col-left,
+  .form-col-right {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .detail-col-left {
+    position: sticky;
+    top: 84px; /* offset for sticky header */
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .detail-col-left::-webkit-scrollbar {
+    display: none; /* Safari & Chrome */
   }
 
   /* Catalog: Auto grid columns (e.g. 3 columns on tablet) */
@@ -1765,14 +1822,6 @@ input:checked + .slider:before {
     gap: 30px;
     align-items: start;
   }
-
-  .detail-header-info { grid-column: 1; grid-row: 1; }
-  .metadata-grid { grid-column: 1; grid-row: 2; }
-  .portions-selector-container { grid-column: 1; grid-row: 3; }
-  #tab-ingredients { grid-column: 1; grid-row: 4; }
-
-  #tab-steps { grid-column: 2; grid-row: 1 / span 4; }
-  #tab-gallery { grid-column: 2; grid-row: 5; }
 
   /* Hide tabs nav and display all contents on tablet/desktop */
   .tabs-nav {
@@ -1800,16 +1849,6 @@ input:checked + .slider:before {
 
   #recipe-form input[type="hidden"] {
     display: none !important;
-  }
-
-  #form-group-ingredients {
-    grid-column: 2;
-    grid-row: 1 / span 4;
-  }
-
-  #form-group-steps {
-    grid-column: 2;
-    grid-row: 5 / span 10;
   }
 }
 

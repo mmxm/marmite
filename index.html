@@ -107,88 +107,92 @@
       </div>
 
       <div class="detail-body">
-        <div class="detail-header-info">
-          <h2 id="detail-title">Nom de la recette</h2>
-          <p id="detail-description" class="recipe-desc">Description de la recette...</p>
-          
-          <div class="detail-tags" id="detail-tags">
-            <!-- Tags dynamically populated -->
+        <div class="detail-col-left">
+          <div class="detail-header-info">
+            <h2 id="detail-title">Nom de la recette</h2>
+            <p id="detail-description" class="recipe-desc">Description de la recette...</p>
+            
+            <div class="detail-tags" id="detail-tags">
+              <!-- Tags dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Metadata Cards -->
+          <div class="metadata-grid">
+            <div class="meta-card">
+              <i class="fa-regular fa-clock"></i>
+              <span class="meta-label">Préparation</span>
+              <span class="meta-value" id="detail-prep-time">20 min</span>
+            </div>
+            <div class="meta-card">
+              <i class="fa-solid fa-fire"></i>
+              <span class="meta-label">Cuisson</span>
+              <span class="meta-value" id="detail-cook-time">30 min</span>
+            </div>
+            <div class="meta-card">
+              <i class="fa-solid fa-circle-info"></i>
+              <span class="meta-label">Catégorie</span>
+              <span class="meta-value" id="detail-category">Plat</span>
+            </div>
+          </div>
+
+          <!-- Portions Selector -->
+          <div class="portions-selector-container">
+            <span class="portions-label">Portions</span>
+            <div class="portions-controls">
+              <button class="btn-portion" onclick="app.changeServings(-1)">
+                <i class="fa-solid fa-minus"></i>
+              </button>
+              <span id="detail-servings-value" class="portions-value">4</span>
+              <button class="btn-portion" onclick="app.changeServings(1)">
+                <i class="fa-solid fa-plus"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- TAB CONTENT: INGREDIENTS -->
+          <div id="tab-ingredients" class="tab-content active">
+            <ul class="ingredients-list" id="detail-ingredients-list">
+              <!-- Dynamically populated ingredients with checkboxes -->
+            </ul>
           </div>
         </div>
 
-        <!-- Metadata Cards -->
-        <div class="metadata-grid">
-          <div class="meta-card">
-            <i class="fa-regular fa-clock"></i>
-            <span class="meta-label">Préparation</span>
-            <span class="meta-value" id="detail-prep-time">20 min</span>
-          </div>
-          <div class="meta-card">
-            <i class="fa-solid fa-fire"></i>
-            <span class="meta-label">Cuisson</span>
-            <span class="meta-value" id="detail-cook-time">30 min</span>
-          </div>
-          <div class="meta-card">
-            <i class="fa-solid fa-circle-info"></i>
-            <span class="meta-label">Catégorie</span>
-            <span class="meta-value" id="detail-category">Plat</span>
-          </div>
-        </div>
-
-        <!-- Portions Selector -->
-        <div class="portions-selector-container">
-          <span class="portions-label">Portions</span>
-          <div class="portions-controls">
-            <button class="btn-portion" onclick="app.changeServings(-1)">
-              <i class="fa-solid fa-minus"></i>
+        <div class="detail-col-right">
+          <!-- Tabs Navigation -->
+          <div class="tabs-nav">
+            <button id="tab-btn-ingredients" class="tab-btn active" onclick="app.switchRecipeTab('ingredients')">
+              Ingrédients (<span id="detail-ingredients-count">0</span>)
             </button>
-            <span id="detail-servings-value" class="portions-value">4</span>
-            <button class="btn-portion" onclick="app.changeServings(1)">
-              <i class="fa-solid fa-plus"></i>
+            <button id="tab-btn-steps" class="tab-btn" onclick="app.switchRecipeTab('steps')">
+              Préparation (<span id="detail-steps-count">0</span>)
+            </button>
+            <button id="tab-btn-gallery" class="tab-btn" onclick="app.switchRecipeTab('gallery')">
+              Photos (<span id="detail-gallery-count">0</span>)
             </button>
           </div>
-        </div>
 
-        <!-- Tabs Navigation -->
-        <div class="tabs-nav">
-          <button id="tab-btn-ingredients" class="tab-btn active" onclick="app.switchRecipeTab('ingredients')">
-            Ingrédients (<span id="detail-ingredients-count">0</span>)
-          </button>
-          <button id="tab-btn-steps" class="tab-btn" onclick="app.switchRecipeTab('steps')">
-            Préparation (<span id="detail-steps-count">0</span>)
-          </button>
-          <button id="tab-btn-gallery" class="tab-btn" onclick="app.switchRecipeTab('gallery')">
-            Photos (<span id="detail-gallery-count">0</span>)
-          </button>
-        </div>
-
-        <!-- TAB CONTENT: INGREDIENTS -->
-        <div id="tab-ingredients" class="tab-content active">
-          <ul class="ingredients-list" id="detail-ingredients-list">
-            <!-- Dynamically populated ingredients with checkboxes -->
-          </ul>
-        </div>
-
-        <!-- TAB CONTENT: STEPS (PREPARATION) -->
-        <div id="tab-steps" class="tab-content">
-          <!-- Cooking Mode Header -->
-          <div class="cooking-mode-header">
-            <span>Mode Cuisine</span>
-            <label class="switch">
-              <input type="checkbox" id="toggle-cooking-mode" onchange="app.toggleCookingMode()">
-              <span class="slider round"></span>
-            </label>
+          <!-- TAB CONTENT: STEPS (PREPARATION) -->
+          <div id="tab-steps" class="tab-content">
+            <!-- Cooking Mode Header -->
+            <div class="cooking-mode-header">
+              <span>Mode Cuisine</span>
+              <label class="switch">
+                <input type="checkbox" id="toggle-cooking-mode" onchange="app.toggleCookingMode()">
+                <span class="slider round"></span>
+              </label>
+            </div>
+            
+            <div class="steps-container" id="detail-steps-list">
+              <!-- Dynamically populated steps -->
+            </div>
           </div>
-          
-          <div class="steps-container" id="detail-steps-list">
-            <!-- Dynamically populated steps -->
-          </div>
-        </div>
 
-        <!-- TAB CONTENT: GALLERY -->
-        <div id="tab-gallery" class="tab-content">
-          <div class="gallery-grid" id="detail-gallery-grid">
-            <!-- Dynamically populated additional photos -->
+          <!-- TAB CONTENT: GALLERY -->
+          <div id="tab-gallery" class="tab-content">
+            <div class="gallery-grid" id="detail-gallery-grid">
+              <!-- Dynamically populated additional photos -->
+            </div>
           </div>
         </div>
       </div>
@@ -273,104 +277,108 @@
           <input type="hidden" id="form-recipe-id">
           
           <!-- Recipe Image Upload -->
-          <div class="form-group image-upload-group">
-            <label>Photo de la Recette</label>
-            <div class="image-preview-container" onclick="document.getElementById('form-recipe-image-file').click()">
-              <img id="form-image-preview" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' width='100%25' height='100%25'><rect width='100%25' height='100%25' fill='%23292524'/><g fill='none' stroke='%23ea580c' stroke-width='6' stroke-linecap='round' stroke-linejoin='round' transform='translate(140, 90)'><path d='M 60 50 A 35 35 0 0 1 10 50 A 25 25 0 0 1 30 15 A 25 25 0 0 1 90 15 A 25 25 0 0 1 110 50 A 35 35 0 0 1 60 50 Z' /><path d='M 25 50 L 95 50 L 90 75 L 30 75 Z' /><path d='M 40 75 L 80 75 L 75 90 L 45 90 Z' /></g><text x='50%25' y='240' fill='%23a8a29e' font-family='\'Outfit\', sans-serif' font-size='16' font-weight='600' text-anchor='middle'>Aucune photo</text></svg>" alt="Aperçu" class="preview-img">
-              <div class="image-upload-overlay">
-                <i class="fa-solid fa-camera"></i>
-                <span>Changer la photo</span>
+          <div class="form-col-left">
+            <div class="form-group image-upload-group">
+              <label>Photo de la Recette</label>
+              <div class="image-preview-container" onclick="document.getElementById('form-recipe-image-file').click()">
+                <img id="form-image-preview" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300' width='100%25' height='100%25'><rect width='100%25' height='100%25' fill='%23292524'/><g fill='none' stroke='%23ea580c' stroke-width='6' stroke-linecap='round' stroke-linejoin='round' transform='translate(140, 90)'><path d='M 60 50 A 35 35 0 0 1 10 50 A 25 25 0 0 1 30 15 A 25 25 0 0 1 90 15 A 25 25 0 0 1 110 50 A 35 35 0 0 1 60 50 Z' /><path d='M 25 50 L 95 50 L 90 75 L 30 75 Z' /><path d='M 40 75 L 80 75 L 75 90 L 45 90 Z' /></g><text x='50%25' y='240' fill='%23a8a29e' font-family='\'Outfit\', sans-serif' font-size='16' font-weight='600' text-anchor='middle'>Aucune photo</text></svg>" alt="Aperçu" class="preview-img">
+                <div class="image-upload-overlay">
+                  <i class="fa-solid fa-camera"></i>
+                  <span>Changer la photo</span>
+                </div>
+              </div>
+              <input type="file" id="form-recipe-image-file" accept="image/*" class="hidden" onchange="app.previewImage(event)">
+            </div>
+
+            <!-- Recipe Additional Images Upload -->
+            <div class="form-group">
+              <label>Photos Annexes (Galerie)</label>
+              <div class="form-additional-gallery" id="form-additional-gallery-container">
+                <!-- Dynamically populated previews of additional photos -->
+                <div class="add-gallery-item-btn" onclick="document.getElementById('form-additional-image-file').click()" title="Ajouter une photo annexe">
+                  <i class="fa-solid fa-plus"></i>
+                  <span>Ajouter</span>
+                </div>
+              </div>
+              <input type="file" id="form-additional-image-file" accept="image/*" class="hidden" onchange="app.addAdditionalFormPhoto(event)">
+            </div>
+
+            <!-- Title -->
+            <div class="form-group">
+              <label for="form-title">Nom de la recette <span class="required">*</span></label>
+              <input type="text" id="form-title" placeholder="Ex: Lasagnes à la bolognaise" required>
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+              <label for="form-description">Description</label>
+              <textarea id="form-description" rows="3" placeholder="Description rapide de votre recette..."></textarea>
+            </div>
+
+            <!-- Category & Servings -->
+            <div class="form-row-2">
+              <div class="form-group">
+                <label for="form-category">Catégorie</label>
+                <select id="form-category">
+                  <option value="Plat">Plat</option>
+                  <option value="Entrée">Entrée</option>
+                  <option value="Dessert">Dessert</option>
+                  <option value="Apéritif">Apéritif</option>
+                  <option value="Boisson">Boisson</option>
+                  <option value="Autre">Autre</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="form-servings">Portions par défaut</label>
+                <input type="number" id="form-servings" min="1" value="4" required>
               </div>
             </div>
-            <input type="file" id="form-recipe-image-file" accept="image/*" class="hidden" onchange="app.previewImage(event)">
-          </div>
 
-          <!-- Recipe Additional Images Upload -->
-          <div class="form-group">
-            <label>Photos Annexes (Galerie)</label>
-            <div class="form-additional-gallery" id="form-additional-gallery-container">
-              <!-- Dynamically populated previews of additional photos -->
-              <div class="add-gallery-item-btn" onclick="document.getElementById('form-additional-image-file').click()" title="Ajouter une photo annexe">
-                <i class="fa-solid fa-plus"></i>
-                <span>Ajouter</span>
+            <!-- Prep & Cook Time -->
+            <div class="form-row-2">
+              <div class="form-group">
+                <label for="form-prep-time">Préparation (min)</label>
+                <input type="number" id="form-prep-time" min="0" value="15">
+              </div>
+              <div class="form-group">
+                <label for="form-cook-time">Cuisson (min)</label>
+                <input type="number" id="form-cook-time" min="0" value="30">
               </div>
             </div>
-            <input type="file" id="form-additional-image-file" accept="image/*" class="hidden" onchange="app.addAdditionalFormPhoto(event)">
-          </div>
 
-          <!-- Title -->
-          <div class="form-group">
-            <label for="form-title">Nom de la recette <span class="required">*</span></label>
-            <input type="text" id="form-title" placeholder="Ex: Lasagnes à la bolognaise" required>
-          </div>
-
-          <!-- Description -->
-          <div class="form-group">
-            <label for="form-description">Description</label>
-            <textarea id="form-description" rows="3" placeholder="Description rapide de votre recette..."></textarea>
-          </div>
-
-          <!-- Category & Servings -->
-          <div class="form-row-2">
+            <!-- Tags -->
             <div class="form-group">
-              <label for="form-category">Catégorie</label>
-              <select id="form-category">
-                <option value="Plat">Plat</option>
-                <option value="Entrée">Entrée</option>
-                <option value="Dessert">Dessert</option>
-                <option value="Apéritif">Apéritif</option>
-                <option value="Boisson">Boisson</option>
-                <option value="Autre">Autre</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="form-servings">Portions par défaut</label>
-              <input type="number" id="form-servings" min="1" value="4" required>
+              <label for="form-tags">Tags (séparés par des virgules)</label>
+              <input type="text" id="form-tags" placeholder="Ex: Italien, Famille, Hiver">
             </div>
           </div>
 
-          <!-- Prep & Cook Time -->
-          <div class="form-row-2">
-            <div class="form-group">
-              <label for="form-prep-time">Préparation (min)</label>
-              <input type="number" id="form-prep-time" min="0" value="15">
+          <div class="form-col-right">
+            <!-- Ingredients Editor -->
+            <div class="form-group" id="form-group-ingredients">
+              <div class="section-title-action">
+                <label>Ingrédients</label>
+                <button type="button" class="btn-link" onclick="app.addFormIngredientRow()">
+                  <i class="fa-solid fa-plus"></i> Ajouter un ingrédient
+                </button>
+              </div>
+              <div class="form-list-rows" id="form-ingredients-list">
+                <!-- Dynamically added rows -->
+              </div>
             </div>
-            <div class="form-group">
-              <label for="form-cook-time">Cuisson (min)</label>
-              <input type="number" id="form-cook-time" min="0" value="30">
-            </div>
-          </div>
 
-          <!-- Tags -->
-          <div class="form-group">
-            <label for="form-tags">Tags (séparés par des virgules)</label>
-            <input type="text" id="form-tags" placeholder="Ex: Italien, Famille, Hiver">
-          </div>
-
-          <!-- Ingredients Editor -->
-          <div class="form-group" id="form-group-ingredients">
-            <div class="section-title-action">
-              <label>Ingrédients</label>
-              <button type="button" class="btn-link" onclick="app.addFormIngredientRow()">
-                <i class="fa-solid fa-plus"></i> Ajouter un ingrédient
-              </button>
+            <!-- Steps Editor -->
+            <div class="form-group" id="form-group-steps">
+              <div class="section-title-action">
+                <label>Étapes de préparation</label>
+                <button type="button" class="btn-link" onclick="app.addFormStepRow()">
+                  <i class="fa-solid fa-plus"></i> Ajouter une étape
+                </button>
+              </div>
+              <ol class="form-list-ordered" id="form-steps-list">
+                <!-- Dynamically added steps -->
+              </ol>
             </div>
-            <div class="form-list-rows" id="form-ingredients-list">
-              <!-- Dynamically added rows -->
-            </div>
-          </div>
-
-          <!-- Steps Editor -->
-          <div class="form-group" id="form-group-steps">
-            <div class="section-title-action">
-              <label>Étapes de préparation</label>
-              <button type="button" class="btn-link" onclick="app.addFormStepRow()">
-                <i class="fa-solid fa-plus"></i> Ajouter une étape
-              </button>
-            </div>
-            <ol class="form-list-ordered" id="form-steps-list">
-              <!-- Dynamically added steps -->
-            </ol>
           </div>
         </form>
       </div>

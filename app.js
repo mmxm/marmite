@@ -1001,6 +1001,7 @@ const app = {
         stepText = step.text || '';
         imageId = step.imageId || null;
       }
+      stepText = stepText.replace(/<img[^>]*>/gi, '').trim();
       
       const imgId = `step-img-${index}`;
       
@@ -1205,6 +1206,7 @@ const app = {
       text = data.text || '';
       existingImageId = data.imageId || null;
     }
+    text = text.replace(/<img[^>]*>/gi, '').trim();
     
     if (existingImageId) {
       li.dataset.existingImageId = existingImageId;
