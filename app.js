@@ -57,6 +57,7 @@ const app = {
         this.showToast('Google Drive non connecté. Session expirée ou non démarrée.', 'info');
       }
     }
+    this.initPwaInstallPrompt();
     this.hideLoader();
   },
 
@@ -66,6 +67,56 @@ const app = {
         .then(() => console.log('[PWA] Service Worker registered'))
         .catch(err => console.error('[PWA] Service Worker registration failed', err));
     }
+  },
+
+  deferredPrompt: null,
+  initPwaInstallPrompt() {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    if (isStandalone) return;
+
+    if (sessionStorage.getItem('marmite_pwa_dismissed')) return;
+
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const banner = document.getElementById('pwa-install-banner');
+    const instruction = document.getElementById('pwa-install-instruction');
+    const installBtn = document.getElementById('btn-pwa-install');
+    
+    if (!banner || !instruction || !installBtn) return;
+
+    if (isIOS) {
+      instruction.innerHTML = 'Ajoutez à votre écran d\'accueil : appuyez sur le bouton Partager <i class="fa-regular fa-share-from-square"></i> puis sur <strong>Sur l\'écran d\'accueil</strong>.';
+      installBtn.classList.add('hidden');
+      banner.classList.remove('hidden');
+    } else {
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        this.deferredPrompt = e;
+        
+        instruction.textContent = 'Installez Marmite sur votre appareil pour cuisiner hors-ligne à tout moment !';
+        installBtn.classList.remove('hidden');
+        banner.classList.remove('hidden');
+        
+        installBtn.onclick = () => {
+          if (!this.deferredPrompt) return;
+          this.deferredPrompt.prompt();
+          this.deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+              console.log('User accepted the install prompt');
+            }
+            this.deferredPrompt = null;
+            this.dismissInstallBanner();
+          });
+        };
+      });
+    }
+  },
+
+  dismissInstallBanner() {
+    const banner = document.getElementById('pwa-install-banner');
+    if (banner) {
+      banner.classList.add('hidden');
+    }
+    sessionStorage.setItem('marmite_pwa_dismissed', 'true');
   },
 
   loadConfig() {
@@ -1473,6 +1524,16 @@ const app = {
     `;
     
     container.appendChild(li);
+    
+    const textarea = li.querySelector('textarea');
+    const adjustHeight = () => {
+      textarea.style.height = 'auto';
+      textarea.style.height = textarea.scrollHeight + 'px';
+    };
+    textarea.addEventListener('input', adjustHeight);
+    if (text) {
+      setTimeout(adjustHeight, 0);
+    }
     
     const thumb = li.querySelector('.form-row-step-thumb');
     const fileInput = li.querySelector('.form-step-file-input');

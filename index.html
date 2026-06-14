@@ -544,6 +544,25 @@
   <!-- Notification Toast -->
   <div id="toast" class="toast hidden">Message de notification</div>
 
+  <!-- PWA Install Banner -->
+  <div id="pwa-install-banner" class="pwa-banner hidden">
+    <div class="pwa-banner-content">
+      <div class="pwa-banner-logo">
+        <img src="icons/icon-192-light.png" alt="Marmite Logo">
+      </div>
+      <div class="pwa-banner-text">
+        <h4>Installer Marmite</h4>
+        <p id="pwa-install-instruction">Installez l'application pour l'utiliser hors-ligne à tout moment.</p>
+      </div>
+      <div class="pwa-banner-actions">
+        <button id="btn-pwa-install" class="btn btn-primary btn-sm">Installer</button>
+        <button id="btn-pwa-close" class="btn-icon pwa-close-btn" title="Fermer" onclick="app.dismissInstallBanner()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Google SDKs -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://apis.google.com/js/api.js" async defer></script>

@@ -1223,6 +1223,8 @@ h1, h2, h3, h4, h5, h6 {
 .form-row-step textarea {
   flex: 1;
   resize: vertical;
+  min-height: 52px;
+  overflow-y: hidden;
 }
 
 /* ==========================================================================
@@ -1947,5 +1949,109 @@ input:checked + .slider:before {
   flex: 1;
   padding: 8px;
   font-size: 0.75rem;
+}
+
+/* ==========================================================================
+   PWA INSTALL BANNER
+   ========================================================================== */
+.pwa-banner {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(0);
+  width: 90%;
+  max-width: 500px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  z-index: 2000;
+  padding: 16px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.pwa-banner.hidden {
+  display: none !important;
+  opacity: 0;
+  transform: translateX(-50%) translateY(100px);
+}
+
+.pwa-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+}
+
+.pwa-banner-logo img {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.pwa-banner-text {
+  flex: 1;
+}
+
+.pwa-banner-text h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--text-main);
+}
+
+.pwa-banner-text p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.pwa-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pwa-close-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--bg-input) !important;
+  color: var(--text-muted) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pwa-close-btn:hover {
+  background-color: var(--border) !important;
+  color: var(--text-main) !important;
+}
+
+/* Adjust for small mobile screens */
+@media (max-width: 480px) {
+  .pwa-banner {
+    bottom: 10px;
+    width: 95%;
+    padding: 12px;
+  }
+  .pwa-banner-content {
+    gap: 10px;
+  }
+  .pwa-banner-logo img {
+    width: 40px;
+    height: 40px;
+  }
+  .pwa-banner-text h4 {
+    font-size: 0.85rem;
+  }
+  .pwa-banner-text p {
+    font-size: 0.72rem;
+  }
+  .pwa-banner-actions {
+    gap: 6px;
+  }
 }
 
