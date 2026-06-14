@@ -2546,20 +2546,9 @@ const app = {
     }
   },
 
-  // Inline SVG generator for recipes with no cover photo
+  // Default placeholder image for recipes with no cover photo
   getRecipeSVGPlaceholder() {
-    return 'data:image/svg+xml;utf8,' + encodeURIComponent(`
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
-        <rect width="100%" height="100%" fill="%23292524"/>
-        <g fill="none" stroke="%23ea580c" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" transform="translate(140, 90)">
-          <!-- Chef Hat/Cook icon -->
-          <path d="M 60 50 A 35 35 0 0 1 10 50 A 25 25 0 0 1 30 15 A 25 25 0 0 1 90 15 A 25 25 0 0 1 110 50 A 35 35 0 0 1 60 50 Z" />
-          <path d="M 25 50 L 95 50 L 90 75 L 30 75 Z" />
-          <path d="M 40 75 L 80 75 L 75 90 L 45 90 Z" />
-        </g>
-        <text x="50%" y="240" fill="%23a8a29e" font-family="'Outfit', sans-serif" font-size="16" font-weight="600" text-anchor="middle">Aucune photo</text>
-      </svg>
-    `);
+    return 'icons/icon-192.png';
   },
 
   addAdditionalFormPhoto(event) {
