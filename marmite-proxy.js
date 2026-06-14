@@ -63,9 +63,22 @@ function doGet(e) {
     // 3. Fallback sur l'IA Gemini si aucun JSON-LD valide n'a été trouvé
     if (!recipe) {
       if (!geminiApiKey) {
+        var pageTitle = "Inconnu";
+        var titleMatch = html.match(/<title>([\s\S]*?)<\/title>/i);
+        if (titleMatch) {
+          pageTitle = titleMatch[1].trim();
+        }
         return createJsonResponse({
           success: false,
-          error: "Aucune métadonnée structurée trouvée sur ce site. Veuillez configurer une clé d'API Gemini (dans l'Apps Script ou dans la PWA) pour activer l'analyse par IA."
+          error: "Aucune métadonnée structurée trouvée sur ce site.\n" +
+                 "Titre de la page récupérée : \"" + pageTitle + "\"\n" +
+                 "Taille de la page : " + html.length + " caractères.\n" +
+                 "Veuillez configurer une clé d'API Gemini (dans l'Apps Script ou la PWA) pour forcer l'analyse par IA.",
+          debug: {
+            title: pageTitle,
+            htmlLength: html.length,
+            htmlSnippet: html.substring(0, 1000)
+          }
         });
       }
       
