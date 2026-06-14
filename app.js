@@ -1204,6 +1204,63 @@ const app = {
     });
   },
 
+  async fetchHtmlWithFallback(url) {
+    const proxies = [
+      {
+        url: (u) => `https://corsproxy.io/?${u}`,
+        parse: async (res) => await res.text()
+      },
+      {
+        url: (u) => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
+        parse: async (res) => {
+          const data = await res.json();
+          return data.contents;
+        }
+      },
+      {
+        url: (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+        parse: async (res) => await res.text()
+      }
+    ];
+
+    let lastError = null;
+    for (const proxy of proxies) {
+      try {
+        const proxyUrl = proxy.url(url);
+        const response = await fetch(proxyUrl);
+        if (!response.ok) throw new Error(`Status ${response.status}`);
+        const html = await proxy.parse(response);
+        if (html && html.trim().length > 0) {
+          return html;
+        }
+      } catch (err) {
+        console.warn(`Proxy failed: ${proxy.url(url)}`, err);
+        lastError = err;
+      }
+    }
+    throw new Error(lastError ? lastError.message : 'Tous les proxies CORS ont échoué.');
+  },
+
+  async fetchBlobWithFallback(url) {
+    const proxyUrls = [
+      `https://corsproxy.io/?${url}`,
+      `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+      `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+    ];
+    
+    for (const proxyUrl of proxyUrls) {
+      try {
+        const response = await fetch(proxyUrl);
+        if (response.ok) {
+          return await response.blob();
+        }
+      } catch (err) {
+        console.warn(`Failed to fetch image via proxy: ${proxyUrl}`, err);
+      }
+    }
+    throw new Error('Impossible de télécharger l\'image via les proxies.');
+  },
+
   async importRecipeFromUrl() {
     const url = document.getElementById('wizard-url-input').value.trim();
     if (!url) {
@@ -1214,13 +1271,8 @@ const app = {
     this.showAiLoading('Scraping du site web...');
     
     try {
-      // 1. Fetch web page HTML using CORS Proxy
-      const proxyUrl = CORS_PROXY + encodeURIComponent(url);
-      const response = await fetch(proxyUrl);
-      if (!response.ok) throw new Error('Impossible de joindre le site via le proxy.');
-      const data = await response.json();
-      
-      const rawHtml = data.contents;
+      // 1. Fetch web page HTML using CORS Proxies with Fallback
+      const rawHtml = await this.fetchHtmlWithFallback(url);
       
       // Try parsing with JSON-LD Schema first (Mealie parser style)
       this.showAiLoading('Recherche de métadonnées structurées...');
@@ -1233,14 +1285,11 @@ const app = {
         if (parsedRecipe.imageUrl) {
           this.showAiLoading('Téléchargement de la photo de la recette...');
           try {
-            const rawImageResp = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(parsedRecipe.imageUrl)}`);
-            if (rawImageResp.ok) {
-              const imgBlob = await rawImageResp.blob();
-              this.compressAndResizeImage(imgBlob, (resizedBlob) => {
-                state.selectedImageBlob = resizedBlob;
-                document.getElementById('form-image-preview').src = URL.createObjectURL(resizedBlob);
-              });
-            }
+            const imgBlob = await this.fetchBlobWithFallback(parsedRecipe.imageUrl);
+            this.compressAndResizeImage(imgBlob, (resizedBlob) => {
+              state.selectedImageBlob = resizedBlob;
+              document.getElementById('form-image-preview').src = URL.createObjectURL(resizedBlob);
+            });
           } catch (imgErr) {
             console.warn('Failed to fetch recipe image', imgErr);
           }
