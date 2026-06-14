@@ -429,6 +429,17 @@
             <input type="url" id="setting-proxy-url" placeholder="https://script.google.com/macros/s/.../exec" onchange="app.saveSettings()">
             <p class="input-hint">Si non renseigné, l'application utilisera des proxies publics et l'IA locale.</p>
           </div>
+
+          <div class="form-group" style="margin-top: 12px;">
+            <label for="setting-proxy-token">Jeton de sécurité du proxy (Token)</label>
+            <div class="password-input-wrapper">
+              <input type="password" id="setting-proxy-token" placeholder="Optionnel (ex: MonSecretRecette123)" onchange="app.saveSettings()">
+              <button class="btn-toggle-password" onclick="app.togglePasswordVisibility('setting-proxy-token')">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+            <p class="input-hint">Requis uniquement si vous avez configuré la propriété ACCESS_TOKEN dans Google Apps Script.</p>
+          </div>
         </div>
 
         <!-- App Storage Info -->

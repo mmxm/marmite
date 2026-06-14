@@ -16,10 +16,11 @@
  * 1. Ouvrez Google Drive (https://drive.google.com)
  * 2. Cliquez sur "Nouveau" > "Plus" > "Google Apps Script" (ou allez sur https://script.google.com).
  * 3. Videz l'éditeur de code par défaut et collez l'intégralité de ce fichier.
- * 4. (Optionnel pour l'IA) Dans l'éditeur Apps Script, allez dans les paramètres du projet (icône d'engrenage à gauche).
- *    Sous "Propriétés du script", ajoutez une propriété :
- *      - Nom : GEMINI_API_KEY
- *      - Valeur : Votre clé d'API Gemini (ex: AIzaSy...)
+ * 4. Configuration des clés et de la sécurité :
+ *    Dans l'éditeur Apps Script, allez dans les paramètres du projet (icône d'engrenage à gauche).
+ *    Sous "Propriétés du script", vous pouvez ajouter ces propriétés :
+ *      - GEMINI_API_KEY : Votre clé d'API Gemini (Optionnelle pour l'IA)
+ *      - ACCESS_TOKEN : Un jeton de sécurité secret de votre choix pour restreindre l'accès à votre proxy (ex: MonSecretRecette123)
  * 5. Cliquez sur "Déployer" en haut à droite > "Nouveau déploiement".
  * 6. Sélectionnez le type "Application Web" :
  *    - Description : Marmite Recipe Proxy
@@ -31,6 +32,15 @@
  */
 
 function doGet(e) {
+  // Vérification du jeton de sécurité si configuré dans les propriétés du script
+  var serverToken = PropertiesService.getScriptProperties().getProperty("ACCESS_TOKEN") || "";
+  if (serverToken) {
+    var clientToken = e.parameter.token || "";
+    if (clientToken !== serverToken) {
+      return createJsonResponse({ success: false, error: "Accès refusé. Jeton de sécurité incorrect." });
+    }
+  }
+
   var url = e.parameter.url;
   if (!url) {
     return createJsonResponse({ success: false, error: "Paramètre 'url' manquant" });

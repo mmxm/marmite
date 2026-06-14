@@ -8,6 +8,7 @@ const state = {
     googleClientId: '',
     geminiApiKey: '',
     importProxyUrl: '',
+    importProxyToken: '',
     folderId: '',
     accessToken: '',
     tokenExpiresAt: 0,
@@ -77,17 +78,20 @@ const app = {
     document.getElementById('setting-client-id').value = state.config.googleClientId || '';
     document.getElementById('setting-gemini-key').value = state.config.geminiApiKey || '';
     document.getElementById('setting-proxy-url').value = state.config.importProxyUrl || '';
+    document.getElementById('setting-proxy-token').value = state.config.importProxyToken || '';
   },
 
   async saveSettings() {
     state.config.googleClientId = document.getElementById('setting-client-id').value.trim();
     state.config.geminiApiKey = document.getElementById('setting-gemini-key').value.trim();
     state.config.importProxyUrl = document.getElementById('setting-proxy-url').value.trim();
+    state.config.importProxyToken = document.getElementById('setting-proxy-token').value.trim();
     
     localStorage.setItem('marmite_config', JSON.stringify({
       googleClientId: state.config.googleClientId,
       geminiApiKey: state.config.geminiApiKey,
       importProxyUrl: state.config.importProxyUrl,
+      importProxyToken: state.config.importProxyToken,
       folderId: state.config.folderId,
       userEmail: state.config.userEmail
     }));
@@ -359,21 +363,27 @@ const app = {
             state.config.importProxyUrl = gConfig.importProxyUrl;
             configChanged = true;
           }
+          if (gConfig.importProxyToken && gConfig.importProxyToken !== state.config.importProxyToken) {
+            state.config.importProxyToken = gConfig.importProxyToken;
+            configChanged = true;
+          }
           
           if (configChanged) {
             localStorage.setItem('marmite_config', JSON.stringify({
               googleClientId: state.config.googleClientId,
               geminiApiKey: state.config.geminiApiKey,
               importProxyUrl: state.config.importProxyUrl,
+              importProxyToken: state.config.importProxyToken,
               folderId: state.config.folderId,
               userEmail: state.config.userEmail
             }));
             document.getElementById('setting-gemini-key').value = state.config.geminiApiKey || '';
             document.getElementById('setting-proxy-url').value = state.config.importProxyUrl || '';
+            document.getElementById('setting-proxy-token').value = state.config.importProxyToken || '';
           }
         }
       } else {
-        if (state.config.geminiApiKey || state.config.importProxyUrl) {
+        if (state.config.geminiApiKey || state.config.importProxyUrl || state.config.importProxyToken) {
           await this.uploadConfigFile(state.config.folderId);
         }
       }
@@ -484,7 +494,8 @@ const app = {
     const fileId = await this.findConfigFileId(folderId);
     const bodyContent = JSON.stringify({
       geminiApiKey: state.config.geminiApiKey || '',
-      importProxyUrl: state.config.importProxyUrl || ''
+      importProxyUrl: state.config.importProxyUrl || '',
+      importProxyToken: state.config.importProxyToken || ''
     });
     
     if (fileId) {
@@ -1413,6 +1424,9 @@ const app = {
       if (state.config.importProxyUrl) {
         this.showAiLoading('Scraping via le serveur proxy Google Apps Script...');
         let fetchUrl = `${state.config.importProxyUrl}?url=${encodeURIComponent(url)}`;
+        if (state.config.importProxyToken) {
+          fetchUrl += `&token=${encodeURIComponent(state.config.importProxyToken)}`;
+        }
         if (state.config.geminiApiKey) {
           fetchUrl += `&geminiApiKey=${encodeURIComponent(state.config.geminiApiKey)}`;
         }
