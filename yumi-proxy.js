@@ -1,11 +1,11 @@
 /**
  * ==========================================================================
- * MARMITE PROXY - SERVEUR DE CAPTURE DE RECETTES
+ * YUMI PROXY - SERVEUR DE CAPTURE DE RECETTES
  * Hébergé sur Google Apps Script (GAS)
  * ==========================================================================
  * 
  * DESCRIPTION :
- * Ce script sert de backend proxy ultra-léger pour l'application Marmite.
+ * Ce script sert de backend proxy ultra-léger pour l'application Yumi.
  * Il permet d'importer des recettes depuis n'importe quel site web en :
  * 1. Contournant les protections CORS et les blocages anti-bots grâce aux serveurs Google.
  * 2. Extraire les métadonnées de recette structurées (JSON-LD) directement en JS.
@@ -23,12 +23,12 @@
  *      - ACCESS_TOKEN : Un jeton de sécurité secret de votre choix pour restreindre l'accès à votre proxy (ex: MonSecretRecette123)
  * 5. Cliquez sur "Déployer" en haut à droite > "Nouveau déploiement".
  * 6. Sélectionnez le type "Application Web" :
- *    - Description : Marmite Recipe Proxy
+ *    - Description : Yumi Recipe Proxy
  *    - Exécuter en tant que : "Moi (votre-adresse-email)"
  *    - Qui a accès : "Tout le monde" (c'est nécessaire pour que la PWA puisse l'interroger).
  * 7. Cliquez sur "Déployer". Autorisez les accès si nécessaire.
  * 8. Copiez l'URL de l'application web générée (elle se termine par "/exec").
- * 9. Collez cette URL dans les "Paramètres" de votre application PWA Marmite.
+ * 9. Collez cette URL dans les "Paramètres" de votre application PWA Yumi.
  */
 
 function doGet(e) {
@@ -123,6 +123,7 @@ function doGet(e) {
  * Retourne une réponse JSON compatible avec CORS
  */
 function createJsonResponse(data) {
+  // Configurer CORS
   return ContentService.createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
 }
