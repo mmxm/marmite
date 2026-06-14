@@ -755,33 +755,62 @@ const app = {
       // 1. Get or create app folder
       if (!state.config.folderId) {
         state.config.folderId = await this.findOrCreateAppFolder();
-        await this.saveSettings();
+        localStorage.setItem('marmite_config', JSON.stringify({
+          googleClientId: state.config.googleClientId,
+          geminiApiKey: state.config.geminiApiKey,
+          importProxyUrl: state.config.importProxyUrl,
+          importProxyToken: state.config.importProxyToken,
+          folderId: state.config.folderId,
+          photosFolderId: state.config.photosFolderId,
+          userEmail: state.config.userEmail
+        }));
       }
       
       // 1.5. Find or download config.json
       const configFileId = await this.findConfigFileId(state.config.folderId);
       if (configFileId) {
         const gConfig = await this.downloadConfigFile(configFileId);
-        let configChanged = false;
+        let configChangedLocal = false;
+        let configChangedRemote = false;
+        
         if (gConfig) {
-          if (gConfig.geminiApiKey && gConfig.geminiApiKey !== state.config.geminiApiKey) {
+          // --- Gemini API Key ---
+          if (!state.config.geminiApiKey && gConfig.geminiApiKey) {
             state.config.geminiApiKey = gConfig.geminiApiKey;
-            configChanged = true;
-          }
-          if (gConfig.importProxyUrl && gConfig.importProxyUrl !== state.config.importProxyUrl) {
-            state.config.importProxyUrl = gConfig.importProxyUrl;
-            configChanged = true;
-          }
-          if (gConfig.importProxyToken && gConfig.importProxyToken !== state.config.importProxyToken) {
-            state.config.importProxyToken = gConfig.importProxyToken;
-            configChanged = true;
-          }
-          if (gConfig.photosFolderId && gConfig.photosFolderId !== state.config.photosFolderId) {
-            state.config.photosFolderId = gConfig.photosFolderId;
-            configChanged = true;
+            configChangedLocal = true;
+          } else if (state.config.geminiApiKey && state.config.geminiApiKey !== gConfig.geminiApiKey) {
+            gConfig.geminiApiKey = state.config.geminiApiKey;
+            configChangedRemote = true;
           }
           
-          if (configChanged) {
+          // --- Import Proxy URL ---
+          if (!state.config.importProxyUrl && gConfig.importProxyUrl) {
+            state.config.importProxyUrl = gConfig.importProxyUrl;
+            configChangedLocal = true;
+          } else if (state.config.importProxyUrl && state.config.importProxyUrl !== gConfig.importProxyUrl) {
+            gConfig.importProxyUrl = state.config.importProxyUrl;
+            configChangedRemote = true;
+          }
+          
+          // --- Import Proxy Token ---
+          if (!state.config.importProxyToken && gConfig.importProxyToken) {
+            state.config.importProxyToken = gConfig.importProxyToken;
+            configChangedLocal = true;
+          } else if (state.config.importProxyToken && state.config.importProxyToken !== gConfig.importProxyToken) {
+            gConfig.importProxyToken = state.config.importProxyToken;
+            configChangedRemote = true;
+          }
+          
+          // --- Photos Folder ID ---
+          if (!state.config.photosFolderId && gConfig.photosFolderId) {
+            state.config.photosFolderId = gConfig.photosFolderId;
+            configChangedLocal = true;
+          } else if (state.config.photosFolderId && state.config.photosFolderId !== gConfig.photosFolderId) {
+            gConfig.photosFolderId = state.config.photosFolderId;
+            configChangedRemote = true;
+          }
+          
+          if (configChangedLocal) {
             localStorage.setItem('marmite_config', JSON.stringify({
               googleClientId: state.config.googleClientId,
               geminiApiKey: state.config.geminiApiKey,
@@ -794,6 +823,10 @@ const app = {
             document.getElementById('setting-gemini-key').value = state.config.geminiApiKey || '';
             document.getElementById('setting-proxy-url').value = state.config.importProxyUrl || '';
             document.getElementById('setting-proxy-token').value = state.config.importProxyToken || '';
+          }
+          
+          if (configChangedRemote) {
+            await this.uploadConfigFile(state.config.folderId);
           }
         }
       } else {
