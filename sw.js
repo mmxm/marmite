@@ -1,4 +1,4 @@
-const CACHE_NAME = 'yumi-v7';
+const CACHE_NAME = 'yumi-v32';
 const ASSETS = [
   './',
   './index.html',
