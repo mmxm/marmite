@@ -93,6 +93,7 @@ const app = {
       importProxyUrl: state.config.importProxyUrl,
       importProxyToken: state.config.importProxyToken,
       folderId: state.config.folderId,
+      photosFolderId: state.config.photosFolderId,
       userEmail: state.config.userEmail
     }));
     this.showToast('Paramètres enregistrés en local', 'success');
@@ -233,6 +234,111 @@ const app = {
     const transaction = this.db.transaction(['images'], 'readwrite');
     const store = transaction.objectStore('images');
     store.clear();
+  },
+
+  deleteCachedImage(fileId) {
+    if (!this.db) return;
+    const transaction = this.db.transaction(['images'], 'readwrite');
+    const store = transaction.objectStore('images');
+    store.delete(fileId);
+  },
+
+  extractImageIds(recipe) {
+    if (!recipe) return [];
+    const ids = [];
+    if (recipe.imageId) {
+      ids.push(recipe.imageId);
+    }
+    if (Array.isArray(recipe.additionalImageIds)) {
+      recipe.additionalImageIds.forEach(id => {
+        if (id) ids.push(id);
+      });
+    }
+    if (Array.isArray(recipe.steps)) {
+      recipe.steps.forEach(step => {
+        if (step && typeof step === 'object' && step.imageId) {
+          ids.push(step.imageId);
+        }
+      });
+    }
+    return ids;
+  },
+
+  detectAndCleanupRemovedImages(originalRecipe, updatedRecipe) {
+    if (!originalRecipe) return;
+    try {
+      const oldIds = this.extractImageIds(originalRecipe);
+      const newIds = this.extractImageIds(updatedRecipe);
+      const deletedIds = oldIds.filter(id => !newIds.includes(id));
+      
+      if (deletedIds.length > 0) {
+        // 1. Delete from local IndexedDB cache immediately
+        deletedIds.forEach(id => {
+          this.deleteCachedImage(id);
+        });
+        
+        // 2. Add to deleted queue in localStorage
+        let queue = [];
+        try {
+          queue = JSON.parse(localStorage.getItem('marmite_deleted_image_ids') || '[]');
+        } catch (e) {
+          console.error(e);
+        }
+        deletedIds.forEach(id => {
+          if (!queue.includes(id)) {
+            queue.push(id);
+          }
+        });
+        localStorage.setItem('marmite_deleted_image_ids', JSON.stringify(queue));
+        
+        // 3. Try to delete from Drive immediately if online
+        if (this.isUserConnected()) {
+          this.processDeletedImagesQueue();
+        }
+      }
+    } catch (err) {
+      console.error('Error in detectAndCleanupRemovedImages:', err);
+    }
+  },
+
+  async deleteImageFromDrive(fileId) {
+    try {
+      await this.driveRequest(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+        method: 'DELETE'
+      });
+      console.log(`Fichier ${fileId} supprimé de Google Drive.`);
+      return true;
+    } catch (err) {
+      console.error(`Erreur de suppression de ${fileId} sur Drive:`, err);
+      // If the file is not found or gone, we count it as processed successfully
+      if (err.message.includes('404') || err.message.includes('410')) {
+        return true;
+      }
+      return false;
+    }
+  },
+
+  async processDeletedImagesQueue() {
+    if (!this.isUserConnected() || !navigator.onLine) return;
+    
+    let queue = [];
+    try {
+      queue = JSON.parse(localStorage.getItem('marmite_deleted_image_ids') || '[]');
+    } catch (e) {
+      console.error(e);
+    }
+    
+    if (queue.length === 0) return;
+    
+    const remainingQueue = [];
+    for (const id of queue) {
+      const success = await this.deleteImageFromDrive(id);
+      if (!success) {
+        remainingQueue.push(id);
+      }
+    }
+    
+    localStorage.setItem('marmite_deleted_image_ids', JSON.stringify(remainingQueue));
   },
 
   // --- Routing & Views ---
@@ -425,6 +531,9 @@ const app = {
       console.log('[Auto-sync] Background sync started...');
     }
     try {
+      // 0. Process any pending image deletions
+      await this.processDeletedImagesQueue();
+      
       // 1. Get or create app folder
       if (!state.config.folderId) {
         state.config.folderId = await this.findOrCreateAppFolder();
@@ -449,6 +558,10 @@ const app = {
             state.config.importProxyToken = gConfig.importProxyToken;
             configChanged = true;
           }
+          if (gConfig.photosFolderId && gConfig.photosFolderId !== state.config.photosFolderId) {
+            state.config.photosFolderId = gConfig.photosFolderId;
+            configChanged = true;
+          }
           
           if (configChanged) {
             localStorage.setItem('marmite_config', JSON.stringify({
@@ -457,6 +570,7 @@ const app = {
               importProxyUrl: state.config.importProxyUrl,
               importProxyToken: state.config.importProxyToken,
               folderId: state.config.folderId,
+              photosFolderId: state.config.photosFolderId,
               userEmail: state.config.userEmail
             }));
             document.getElementById('setting-gemini-key').value = state.config.geminiApiKey || '';
@@ -530,6 +644,55 @@ const app = {
     return folder.id;
   },
 
+  async findOrCreatePhotosFolder(parentFolderId) {
+    if (state.config.photosFolderId) {
+      return state.config.photosFolderId;
+    }
+    
+    const q = encodeURIComponent(`name='Photos' and mimeType='application/vnd.google-apps.folder' and '${parentFolderId}' in parents and trashed=false`);
+    const response = await this.driveRequest(`https://www.googleapis.com/drive/v3/files?q=${q}`);
+    const data = await response.json();
+    
+    if (data.files && data.files.length > 0) {
+      state.config.photosFolderId = data.files[0].id;
+      localStorage.setItem('marmite_config', JSON.stringify({
+        googleClientId: state.config.googleClientId,
+        geminiApiKey: state.config.geminiApiKey,
+        importProxyUrl: state.config.importProxyUrl,
+        importProxyToken: state.config.importProxyToken,
+        folderId: state.config.folderId,
+        photosFolderId: state.config.photosFolderId,
+        userEmail: state.config.userEmail
+      }));
+      await this.uploadConfigFile(parentFolderId);
+      return state.config.photosFolderId;
+    }
+    
+    // Create new folder
+    const createResp = await this.driveRequest('https://www.googleapis.com/drive/v3/files', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: 'Photos',
+        mimeType: 'application/vnd.google-apps.folder',
+        parents: [parentFolderId]
+      })
+    });
+    const folder = await createResp.json();
+    state.config.photosFolderId = folder.id;
+    localStorage.setItem('marmite_config', JSON.stringify({
+      googleClientId: state.config.googleClientId,
+      geminiApiKey: state.config.geminiApiKey,
+      importProxyUrl: state.config.importProxyUrl,
+      importProxyToken: state.config.importProxyToken,
+      folderId: state.config.folderId,
+      photosFolderId: state.config.photosFolderId,
+      userEmail: state.config.userEmail
+    }));
+    await this.uploadConfigFile(parentFolderId);
+    return folder.id;
+  },
+
   async findRecipesFileId(folderId) {
     const q = encodeURIComponent(`name='recipes.json' and '${folderId}' in parents and trashed=false`);
     const response = await this.driveRequest(`https://www.googleapis.com/drive/v3/files?q=${q}`);
@@ -592,7 +755,8 @@ const app = {
     const bodyContent = JSON.stringify({
       geminiApiKey: state.config.geminiApiKey || '',
       importProxyUrl: state.config.importProxyUrl || '',
-      importProxyToken: state.config.importProxyToken || ''
+      importProxyToken: state.config.importProxyToken || '',
+      photosFolderId: state.config.photosFolderId || ''
     });
     
     if (fileId) {
@@ -630,13 +794,15 @@ const app = {
       state.config.folderId = await this.findOrCreateAppFolder();
     }
     
+    const photosFolderId = await this.findOrCreatePhotosFolder(state.config.folderId);
+    
     // 1. Create file metadata
     const metaResp = await this.driveRequest('https://www.googleapis.com/drive/v3/files', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: name,
-        parents: [state.config.folderId],
+        parents: [photosFolderId],
         mimeType: 'image/jpeg'
       })
     });
@@ -656,8 +822,8 @@ const app = {
   },
 
   // Fetch image from Google Drive and render to <img> element
-  async displayDriveImage(fileId, imgElementId) {
-    const imgEl = document.getElementById(imgElementId);
+  async displayDriveImage(fileId, imgElementOrId) {
+    const imgEl = typeof imgElementOrId === 'string' ? document.getElementById(imgElementOrId) : imgElementOrId;
     if (!imgEl) return;
     
     // If it's a local asset path (from imported Mealie ZIP backup), display directly
@@ -895,8 +1061,22 @@ const app = {
     if (recipe.imageId) {
       heroImg.src = this.getRecipeSVGPlaceholder(); // temporary
       this.displayDriveImage(recipe.imageId, 'detail-image');
+      heroImg.onclick = () => this.openLightbox(recipe.imageId);
+      heroImg.style.cursor = 'pointer';
     } else {
       heroImg.src = this.getRecipeSVGPlaceholder();
+      heroImg.onclick = null;
+      heroImg.style.cursor = 'default';
+    }
+
+    // Display Notes
+    const notesContainer = document.getElementById('detail-notes-container');
+    const notesEl = document.getElementById('detail-notes');
+    if (recipe.notes && recipe.notes.trim()) {
+      notesEl.textContent = recipe.notes;
+      notesContainer.classList.remove('hidden');
+    } else {
+      notesContainer.classList.add('hidden');
     }
     
     // Render tabs list
@@ -1075,11 +1255,38 @@ const app = {
   handleStepClick(index) {
     const card = document.getElementById(`step-card-${index}`);
     if (state.cookingModeActive) {
-      state.activeStepIndex = index;
-      this.highlightActiveStep();
-      card.classList.toggle('completed');
+      if (index > state.activeStepIndex) {
+        // Mark intermediate steps as completed (from active step up to index - 1)
+        for (let i = state.activeStepIndex; i < index; i++) {
+          const intermediateCard = document.getElementById(`step-card-${i}`);
+          if (intermediateCard) {
+            intermediateCard.classList.add('completed');
+          }
+        }
+        state.activeStepIndex = index;
+        this.highlightActiveStep();
+      } else if (index === state.activeStepIndex) {
+        // Mark current as completed and advance highlight
+        if (card) {
+          card.classList.add('completed');
+        }
+        const totalSteps = document.querySelectorAll('.step-card').length;
+        if (state.activeStepIndex < totalSteps - 1) {
+          state.activeStepIndex++;
+          this.highlightActiveStep();
+        }
+      } else {
+        // Clic sur une étape passée: reculer, surligner, et décocher
+        state.activeStepIndex = index;
+        this.highlightActiveStep();
+        if (card) {
+          card.classList.remove('completed');
+        }
+      }
     } else {
-      card.classList.toggle('completed');
+      if (card) {
+        card.classList.toggle('completed');
+      }
     }
   },
 
@@ -1102,6 +1309,7 @@ const app = {
     document.getElementById('form-view-title').textContent = 'Nouvelle Recette';
     document.getElementById('form-title').value = '';
     document.getElementById('form-description').value = '';
+    document.getElementById('form-notes').value = '';
     document.getElementById('form-category').value = 'Plat';
     document.getElementById('form-servings').value = 4;
     document.getElementById('form-prep-time').value = 15;
@@ -1141,6 +1349,7 @@ const app = {
     document.getElementById('form-view-title').textContent = 'Modifier la Recette';
     document.getElementById('form-title').value = recipe.title;
     document.getElementById('form-description').value = recipe.description || '';
+    document.getElementById('form-notes').value = recipe.notes || '';
     document.getElementById('form-category').value = recipe.category || 'Plat';
     document.getElementById('form-servings').value = recipe.servings || 4;
     document.getElementById('form-prep-time').value = recipe.prepTime || 15;
@@ -1378,9 +1587,15 @@ const app = {
 
     // Build or update recipe object
     let recipe;
+    let originalRecipe = null;
     if (isEdit) {
-      recipe = state.recipes.find(r => r.id === recipeId);
-    } else {
+      const found = state.recipes.find(r => r.id === recipeId);
+      if (found) {
+        recipe = found;
+        originalRecipe = JSON.parse(JSON.stringify(found));
+      }
+    }
+    if (!recipe) {
       recipe = {
         id: finalRecipeId,
         createdAt: new Date().toISOString()
@@ -1438,6 +1653,7 @@ const app = {
       
       recipe.title = formTitle;
       recipe.description = document.getElementById('form-description').value.trim();
+      recipe.notes = document.getElementById('form-notes').value.trim();
       recipe.category = document.getElementById('form-category').value;
       recipe.servings = parseInt(document.getElementById('form-servings').value) || 4;
       recipe.prepTime = parseInt(document.getElementById('form-prep-time').value) || 0;
@@ -1445,6 +1661,9 @@ const app = {
       recipe.tags = document.getElementById('form-tags').value.split(',').map(t => t.trim()).filter(t => t);
       recipe.ingredients = ingredients;
       recipe.updatedAt = new Date().toISOString();
+
+      // Check for removed/replaced images and delete/queue them
+      this.detectAndCleanupRemovedImages(originalRecipe, recipe);
 
       // 2. Insert or update in local list
       if (!isEdit) {
@@ -1481,6 +1700,9 @@ const app = {
       // Find index
       const index = state.recipes.findIndex(r => r.id === recipeId);
       if (index > -1) {
+        const recipeToDelete = state.recipes[index];
+        this.detectAndCleanupRemovedImages(recipeToDelete, null);
+        
         state.recipes.splice(index, 1);
         this.saveRecipesLocally();
         
@@ -2132,6 +2354,7 @@ const app = {
     // Fill basic fields
     document.getElementById('form-title').value = recipe.title || '';
     document.getElementById('form-description').value = recipe.description || '';
+    document.getElementById('form-notes').value = recipe.notes || '';
     document.getElementById('form-category').value = recipe.category || 'Plat';
     document.getElementById('form-servings').value = recipe.servings || 4;
     document.getElementById('form-prep-time').value = recipe.prepTime || 15;
@@ -2260,7 +2483,7 @@ const app = {
       itemEl.appendChild(imgEl);
       
       if (item.existing) {
-        this.displayDriveImage(item.id, imgEl.id);
+        this.displayDriveImage(item.id, imgEl);
       } else {
         imgEl.src = URL.createObjectURL(item.file);
       }
@@ -2280,6 +2503,7 @@ const app = {
   },
 
   async openLightbox(imageId) {
+    if (!imageId) return;
     const modal = document.getElementById('lightbox-modal');
     const img = document.getElementById('lightbox-img');
     if (!modal || !img) return;

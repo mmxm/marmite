@@ -612,6 +612,29 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 500;
 }
 
+/* Recipe Notes Card */
+.detail-notes-card {
+  margin-top: 20px;
+  padding: 16px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+.detail-notes-card h4 {
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.detail-notes-card p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+  white-space: pre-line;
+}
+
 /* Metadata Grid */
 .metadata-grid {
   display: grid;
