@@ -32,7 +32,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 const app = {
-  version: '1.1.0',
+  version: '1.1.1',
   // --- Lifecyle ---
   async init() {
     this.registerServiceWorker();
