@@ -419,6 +419,18 @@
           </div>
         </div>
 
+        <!-- Google Apps Script Proxy configuration -->
+        <div class="settings-card">
+          <h3><i class="fa-solid fa-server"></i> Serveur Proxy Google Apps Script</h3>
+          <p class="settings-desc">Optionnel. Saisissez l'URL de votre Web App Google Apps Script pour contourner les protections CORS et améliorer la capture des images et des recettes.</p>
+          
+          <div class="form-group">
+            <label for="setting-proxy-url">URL de la Web App Google Apps Script</label>
+            <input type="url" id="setting-proxy-url" placeholder="https://script.google.com/macros/s/.../exec" onchange="app.saveSettings()">
+            <p class="input-hint">Si non renseigné, l'application utilisera des proxies publics et l'IA locale.</p>
+          </div>
+        </div>
+
         <!-- App Storage Info -->
         <div class="settings-card">
           <h3><i class="fa-solid fa-database"></i> Cache et Données Locales</h3>

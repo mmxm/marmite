@@ -7,6 +7,7 @@ const state = {
   config: {
     googleClientId: '',
     geminiApiKey: '',
+    importProxyUrl: '',
     folderId: '',
     accessToken: '',
     tokenExpiresAt: 0,
@@ -75,15 +76,18 @@ const app = {
     // Populate form fields in Settings
     document.getElementById('setting-client-id').value = state.config.googleClientId || '';
     document.getElementById('setting-gemini-key').value = state.config.geminiApiKey || '';
+    document.getElementById('setting-proxy-url').value = state.config.importProxyUrl || '';
   },
 
   saveSettings() {
     state.config.googleClientId = document.getElementById('setting-client-id').value.trim();
     state.config.geminiApiKey = document.getElementById('setting-gemini-key').value.trim();
+    state.config.importProxyUrl = document.getElementById('setting-proxy-url').value.trim();
     
     localStorage.setItem('marmite_config', JSON.stringify({
       googleClientId: state.config.googleClientId,
       geminiApiKey: state.config.geminiApiKey,
+      importProxyUrl: state.config.importProxyUrl,
       folderId: state.config.folderId,
       userEmail: state.config.userEmail
     }));
@@ -1315,71 +1319,133 @@ const app = {
       return;
     }
     
-    this.showAiLoading('Scraping du site web...');
-    
     try {
-      // 1. Fetch web page HTML using CORS Proxies with Fallback
-      const rawHtml = await this.fetchHtmlWithFallback(url);
-      
-      // Try parsing with JSON-LD Schema first (Mealie parser style)
-      this.showAiLoading('Recherche de métadonnées structurées...');
-      let parsedRecipe = this.parseRecipeSchema(rawHtml);
-      
-      if (parsedRecipe) {
-        this.applyImportedRecipe(parsedRecipe);
-        
-        // Try to fetch cover image if present
-        if (parsedRecipe.imageUrl) {
-          this.showAiLoading('Téléchargement de la photo de la recette...');
-          try {
-            const imgBlob = await this.fetchBlobWithFallback(parsedRecipe.imageUrl);
-            this.compressAndResizeImage(imgBlob, (resizedBlob) => {
-              state.selectedImageBlob = resizedBlob;
-              document.getElementById('form-image-preview').src = URL.createObjectURL(resizedBlob);
-            });
-          } catch (imgErr) {
-            console.warn('Failed to fetch recipe image', imgErr);
-          }
+      if (state.config.importProxyUrl) {
+        this.showAiLoading('Scraping via le serveur proxy Google Apps Script...');
+        let fetchUrl = `${state.config.importProxyUrl}?url=${encodeURIComponent(url)}`;
+        if (state.config.geminiApiKey) {
+          fetchUrl += `&geminiApiKey=${encodeURIComponent(state.config.geminiApiKey)}`;
         }
         
-        this.showToast('Recette importée via Métadonnées (sans IA) !', 'success');
-        document.getElementById('wizard-url-input').value = '';
-      } else {
-        // Fallback to Gemini AI
-        if (!state.config.geminiApiKey) {
-          throw new Error('Aucune métadonnée structurée trouvée sur ce site. Veuillez configurer une clé d\'API Gemini dans les paramètres pour activer l\'analyse par IA.');
+        const response = await fetch(fetchUrl);
+        if (!response.ok) {
+          throw new Error(`Erreur du proxy Google Apps Script (${response.status})`);
+        }
+        const data = await response.json();
+        if (data.error) {
+          throw new Error(data.error);
         }
         
-        this.showAiLoading('Analyse de la page par Gemini...');
-        const cleanedText = this.cleanHtmlForAi(rawHtml);
-        
-        const prompt = `Tu es un assistant de cuisine expert. Analyse le texte brut suivant extrait d'un site internet de cuisine, et structure la recette sous forme de JSON correspondant à ce schéma précis :
-        {
-          "title": "Titre court",
-          "description": "Explication courte",
-          "prepTime": 15,
-          "cookTime": 30,
-          "servings": 4,
-          "category": "Entrée|Plat|Dessert|Apéritif|Boisson|Autre",
-          "tags": ["tag1", "tag2"],
-          "ingredients": [{"name": "Nom ingrédient", "quantity": 1.5, "unit": "g|kg|l|cl|ml|cuillère à soupe|sachet|unité|pincée"}],
-          "steps": ["Étape 1...", "Étape 2..."]
-        }
-        Réponds uniquement avec le JSON. Voici le texte brut : \n\n${cleanedText}`;
-
-        const payload = {
-          contents: [
-            {
-              parts: [{ text: prompt }]
+        if (data.success && data.recipe) {
+          const parsedRecipe = data.recipe;
+          this.applyImportedRecipe(parsedRecipe);
+          
+          if (data.imageBase64) {
+            try {
+              const mimeMatch = data.imageBase64.match(/^data:(image\/[a-zA-Z+.-]+);base64,/);
+              const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+              const cleanBase64 = data.imageBase64.split(',')[1];
+              const byteCharacters = atob(cleanBase64);
+              const byteNumbers = new Array(byteCharacters.length);
+              for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+              }
+              const byteArray = new Uint8Array(byteNumbers);
+              const imgBlob = new Blob([byteArray], { type: mimeType });
+              
+              this.compressAndResizeImage(imgBlob, (resizedBlob) => {
+                state.selectedImageBlob = resizedBlob;
+                document.getElementById('form-image-preview').src = URL.createObjectURL(resizedBlob);
+              });
+            } catch (imgErr) {
+              console.warn('Failed to process base64 image from proxy', imgErr);
             }
-          ]
-        };
-
-        const parsedRecipe = await this.callGeminiApi(payload);
-        this.applyImportedRecipe(parsedRecipe);
+          } else if (parsedRecipe.imageUrl) {
+            this.showAiLoading('Téléchargement de la photo de la recette...');
+            try {
+              const imgBlob = await this.fetchBlobWithFallback(parsedRecipe.imageUrl);
+              this.compressAndResizeImage(imgBlob, (resizedBlob) => {
+                state.selectedImageBlob = resizedBlob;
+                document.getElementById('form-image-preview').src = URL.createObjectURL(resizedBlob);
+              });
+            } catch (imgErr) {
+              console.warn('Failed to fetch recipe image', imgErr);
+            }
+          }
+          
+          const sourceText = data.source === 'gemini' ? 'via IA Gemini (Proxy)' : 'via Métadonnées (Proxy)';
+          this.showToast(`Recette importée ${sourceText} !`, 'success');
+          document.getElementById('wizard-url-input').value = '';
+        } else {
+          throw new Error("Le proxy n'a pas pu extraire la recette.");
+        }
+      } else {
+        // Fallback local
+        this.showAiLoading('Scraping du site web...');
         
-        this.showToast('Recette importée via IA Gemini !', 'success');
-        document.getElementById('wizard-url-input').value = '';
+        // 1. Fetch web page HTML using CORS Proxies with Fallback
+        const rawHtml = await this.fetchHtmlWithFallback(url);
+        
+        // Try parsing with JSON-LD Schema first (Mealie parser style)
+        this.showAiLoading('Recherche de métadonnées structurées...');
+        let parsedRecipe = this.parseRecipeSchema(rawHtml);
+        
+        if (parsedRecipe) {
+          this.applyImportedRecipe(parsedRecipe);
+          
+          // Try to fetch cover image if present
+          if (parsedRecipe.imageUrl) {
+            this.showAiLoading('Téléchargement de la photo de la recette...');
+            try {
+              const imgBlob = await this.fetchBlobWithFallback(parsedRecipe.imageUrl);
+              this.compressAndResizeImage(imgBlob, (resizedBlob) => {
+                state.selectedImageBlob = resizedBlob;
+                document.getElementById('form-image-preview').src = URL.createObjectURL(resizedBlob);
+              });
+            } catch (imgErr) {
+              console.warn('Failed to fetch recipe image', imgErr);
+            }
+          }
+          
+          this.showToast('Recette importée via Métadonnées (sans IA) !', 'success');
+          document.getElementById('wizard-url-input').value = '';
+        } else {
+          // Fallback to Gemini AI
+          if (!state.config.geminiApiKey) {
+            throw new Error('Aucune métadonnée structurée trouvée sur ce site. Veuillez configurer une clé d\'API Gemini dans les paramètres pour activer l\'analyse par IA.');
+          }
+          
+          this.showAiLoading('Analyse de la page par Gemini...');
+          const cleanedText = this.cleanHtmlForAi(rawHtml);
+          
+          const prompt = `Tu es un assistant de cuisine expert. Analyse le texte brut suivant extrait d'un site internet de cuisine, et structure la recette sous forme de JSON correspondant à ce schéma précis :
+          {
+            "title": "Titre court",
+            "description": "Explication courte",
+            "prepTime": 15,
+            "cookTime": 30,
+            "servings": 4,
+            "category": "Entrée|Plat|Dessert|Apéritif|Boisson|Autre",
+            "tags": ["tag1", "tag2"],
+            "ingredients": [{"name": "Nom ingrédient", "quantity": 1.5, "unit": "g|kg|l|cl|ml|cuillère à soupe|sachet|unité|pincée"}],
+            "steps": ["Étape 1...", "Étape 2..."]
+          }
+          Réponds uniquement avec le JSON. Voici le texte brut : \n\n${cleanedText}`;
+
+          const payload = {
+            contents: [
+              {
+                parts: [{ text: prompt }]
+              }
+            ]
+          };
+
+          const parsedRecipe = await this.callGeminiApi(payload);
+          this.applyImportedRecipe(parsedRecipe);
+          
+          this.showToast('Recette importée via IA Gemini !', 'success');
+          document.getElementById('wizard-url-input').value = '';
+        }
       }
     } catch (err) {
       console.error(err);
