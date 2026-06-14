@@ -468,6 +468,90 @@ const app = {
     localStorage.setItem('marmite_deleted_image_ids', JSON.stringify(remainingQueue));
   },
 
+  async processOfflineImagesQueue() {
+    if (!this.isUserConnected() || !navigator.onLine) return;
+    
+    let dbChanged = false;
+    
+    for (const recipe of state.recipes) {
+      if (recipe.deleted) continue;
+      
+      let recipeChanged = false;
+      
+      // 1. Cover Image
+      if (recipe.imageId && recipe.imageId.startsWith('local_img_')) {
+        const tempId = recipe.imageId;
+        const blob = await this.getCachedImage(tempId);
+        if (blob) {
+          try {
+            console.log(`[Offline Sync] Uploading cover image for recipe: ${recipe.title}`);
+            const newId = await this.uploadImageToDrive(blob, `${recipe.id}.jpg`);
+            recipe.imageId = newId;
+            this.deleteCachedImage(tempId);
+            this.cacheImage(newId, blob);
+            recipeChanged = true;
+          } catch (err) {
+            console.error('Failed to upload offline cover image', err);
+          }
+        }
+      }
+      
+      // 2. Additional Gallery Images
+      if (Array.isArray(recipe.additionalImageIds)) {
+        for (let i = 0; i < recipe.additionalImageIds.length; i++) {
+          const tempId = recipe.additionalImageIds[i];
+          if (tempId && tempId.startsWith('local_img_')) {
+            const blob = await this.getCachedImage(tempId);
+            if (blob) {
+              try {
+                console.log(`[Offline Sync] Uploading gallery image ${i} for recipe: ${recipe.title}`);
+                const newId = await this.uploadImageToDrive(blob, `${recipe.id}_gallery_${Date.now()}_${i}.jpg`);
+                recipe.additionalImageIds[i] = newId;
+                this.deleteCachedImage(tempId);
+                this.cacheImage(newId, blob);
+                recipeChanged = true;
+              } catch (err) {
+                console.error('Failed to upload offline gallery image', err);
+              }
+            }
+          }
+        }
+      }
+      
+      // 3. Step Images
+      if (Array.isArray(recipe.steps)) {
+        for (let i = 0; i < recipe.steps.length; i++) {
+          const step = recipe.steps[i];
+          if (step && typeof step === 'object' && step.imageId && step.imageId.startsWith('local_img_')) {
+            const tempId = step.imageId;
+            const blob = await this.getCachedImage(tempId);
+            if (blob) {
+              try {
+                console.log(`[Offline Sync] Uploading step image ${i} for recipe: ${recipe.title}`);
+                const newId = await this.uploadImageToDrive(blob, `${recipe.id}_step_${Date.now()}_${i}.jpg`);
+                step.imageId = newId;
+                this.deleteCachedImage(tempId);
+                this.cacheImage(newId, blob);
+                recipeChanged = true;
+              } catch (err) {
+                console.error('Failed to upload offline step image', err);
+              }
+            }
+          }
+        }
+      }
+      
+      if (recipeChanged) {
+        recipe.updatedAt = new Date().toISOString();
+        dbChanged = true;
+      }
+    }
+    
+    if (dbChanged) {
+      this.saveRecipesLocally();
+    }
+  },
+
   // --- Routing & Views ---
   navigate(viewId) {
     state.activeView = viewId;
@@ -664,6 +748,9 @@ const app = {
     try {
       // 0. Process any pending image deletions
       await this.processDeletedImagesQueue();
+      
+      // 0.5. Upload any pending local offline images to Google Drive
+      await this.processOfflineImagesQueue();
       
       // 1. Get or create app folder
       if (!state.config.folderId) {
@@ -1746,14 +1833,14 @@ const app = {
     }
 
     try {
-      // 1. Upload photo to Google Drive first if selected
+      // 1. Process cover image offline
       if (state.selectedImageBlob) {
-        const imgName = `${recipe.id}.jpg`;
-        const imageId = await this.uploadImageToDrive(state.selectedImageBlob, imgName);
-        recipe.imageId = imageId;
+        const tempId = `local_img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        this.cacheImage(tempId, state.selectedImageBlob);
+        recipe.imageId = tempId;
       }
       
-      // 1.2. Upload additional gallery photos if selected
+      // 1.2. Process additional gallery photos offline
       const additionalImageIds = [];
       if (state.selectedAdditionalImages) {
         for (let i = 0; i < state.selectedAdditionalImages.length; i++) {
@@ -1761,15 +1848,15 @@ const app = {
           if (item.existing) {
             additionalImageIds.push(item.id);
           } else {
-            const imgName = `${recipe.id}_gallery_${Date.now()}_${i}.jpg`;
-            const newId = await this.uploadImageToDrive(item.file, imgName);
-            additionalImageIds.push(newId);
+            const tempId = `local_img_${Date.now()}_gal_${i}_${Math.random().toString(36).substr(2, 9)}`;
+            this.cacheImage(tempId, item.file);
+            additionalImageIds.push(tempId);
           }
         }
       }
       recipe.additionalImageIds = additionalImageIds;
 
-      // 1.3. Upload step images and collect steps
+      // 1.3. Process step images offline
       const steps = [];
       const stepRows = document.querySelectorAll('#form-steps-list .form-row-step');
       for (let i = 0; i < stepRows.length; i++) {
@@ -1778,8 +1865,9 @@ const app = {
         if (textVal) {
           let imageId = row.dataset.existingImageId || null;
           if (row.imageFile) {
-            const stepImgName = `${recipe.id}_step_${Date.now()}_${i}.jpg`;
-            imageId = await this.uploadImageToDrive(row.imageFile, stepImgName);
+            const tempId = `local_img_${Date.now()}_step_${i}_${Math.random().toString(36).substr(2, 9)}`;
+            this.cacheImage(tempId, row.imageFile);
+            imageId = tempId;
           }
           
           if (imageId) {
