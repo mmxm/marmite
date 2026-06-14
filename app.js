@@ -862,6 +862,7 @@ const app = {
     state.activeRecipe = recipe;
     state.servingsMultiplier = 1; // reset servings
     state.cookingModeActive = false;
+    state.tabScrollPositions = {}; // reset scroll positions
     document.getElementById('toggle-cooking-mode').checked = false;
     
     // Fill basic details
@@ -925,11 +926,39 @@ const app = {
   },
 
   switchRecipeTab(tabId) {
+    const tabsNav = document.querySelector('.tabs-nav');
+    const isMobile = tabsNav && window.getComputedStyle(tabsNav).display !== 'none';
+    
+    if (isMobile) {
+      if (!state.tabScrollPositions) {
+        state.tabScrollPositions = {};
+      }
+      // Record scroll position of currently active tab
+      const activeTabBtn = document.querySelector('.tab-btn.active');
+      if (activeTabBtn) {
+        const currentActiveTabId = activeTabBtn.id.replace('tab-btn-', '');
+        state.tabScrollPositions[currentActiveTabId] = window.scrollY;
+      }
+    }
+
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
     
     document.getElementById(`tab-btn-${tabId}`).classList.add('active');
     document.getElementById(`tab-${tabId}`).classList.add('active');
+
+    if (isMobile) {
+      const rect = tabsNav.getBoundingClientRect();
+      const tabsNavTop = rect.top + window.scrollY;
+      
+      setTimeout(() => {
+        if (state.tabScrollPositions && state.tabScrollPositions[tabId] !== undefined) {
+          window.scrollTo(0, state.tabScrollPositions[tabId]);
+        } else if (window.scrollY > tabsNavTop) {
+          window.scrollTo(0, tabsNavTop);
+        }
+      }, 0);
+    }
   },
 
   changeServings(delta) {
