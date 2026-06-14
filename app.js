@@ -79,7 +79,7 @@ const app = {
     document.getElementById('setting-proxy-url').value = state.config.importProxyUrl || '';
   },
 
-  saveSettings() {
+  async saveSettings() {
     state.config.googleClientId = document.getElementById('setting-client-id').value.trim();
     state.config.geminiApiKey = document.getElementById('setting-gemini-key').value.trim();
     state.config.importProxyUrl = document.getElementById('setting-proxy-url').value.trim();
@@ -92,6 +92,15 @@ const app = {
       userEmail: state.config.userEmail
     }));
     this.showToast('Paramètres enregistrés en local', 'success');
+    
+    if (this.isUserConnected() && state.config.folderId) {
+      try {
+        await this.uploadConfigFile(state.config.folderId);
+        console.log('Configuration synchronisée sur Google Drive');
+      } catch (err) {
+        console.warn('Failed to upload configuration to Google Drive', err);
+      }
+    }
   },
 
   setupEventListeners() {
@@ -333,7 +342,40 @@ const app = {
       // 1. Get or create app folder
       if (!state.config.folderId) {
         state.config.folderId = await this.findOrCreateAppFolder();
-        this.saveSettings();
+        await this.saveSettings();
+      }
+      
+      // 1.5. Find or download config.json
+      const configFileId = await this.findConfigFileId(state.config.folderId);
+      if (configFileId) {
+        const gConfig = await this.downloadConfigFile(configFileId);
+        let configChanged = false;
+        if (gConfig) {
+          if (gConfig.geminiApiKey && gConfig.geminiApiKey !== state.config.geminiApiKey) {
+            state.config.geminiApiKey = gConfig.geminiApiKey;
+            configChanged = true;
+          }
+          if (gConfig.importProxyUrl && gConfig.importProxyUrl !== state.config.importProxyUrl) {
+            state.config.importProxyUrl = gConfig.importProxyUrl;
+            configChanged = true;
+          }
+          
+          if (configChanged) {
+            localStorage.setItem('marmite_config', JSON.stringify({
+              googleClientId: state.config.googleClientId,
+              geminiApiKey: state.config.geminiApiKey,
+              importProxyUrl: state.config.importProxyUrl,
+              folderId: state.config.folderId,
+              userEmail: state.config.userEmail
+            }));
+            document.getElementById('setting-gemini-key').value = state.config.geminiApiKey || '';
+            document.getElementById('setting-proxy-url').value = state.config.importProxyUrl || '';
+          }
+        }
+      } else {
+        if (state.config.geminiApiKey || state.config.importProxyUrl) {
+          await this.uploadConfigFile(state.config.folderId);
+        }
       }
       
       // 2. Find or create recipes.json
@@ -411,6 +453,54 @@ const app = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: 'recipes.json',
+          parents: [folderId],
+          mimeType: 'application/json'
+        })
+      });
+      const newFile = await metaResp.json();
+      
+      // Upload content
+      await this.driveRequest(`https://www.googleapis.com/upload/drive/v3/files/${newFile.id}?uploadType=media`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: bodyContent
+      });
+    }
+  },
+
+  async findConfigFileId(folderId) {
+    const q = encodeURIComponent(`name='config.json' and '${folderId}' in parents and trashed=false`);
+    const response = await this.driveRequest(`https://www.googleapis.com/drive/v3/files?q=${q}`);
+    const data = await response.json();
+    return (data.files && data.files.length > 0) ? data.files[0].id : null;
+  },
+
+  async downloadConfigFile(fileId) {
+    const response = await this.driveRequest(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`);
+    return await response.json();
+  },
+
+  async uploadConfigFile(folderId) {
+    const fileId = await this.findConfigFileId(folderId);
+    const bodyContent = JSON.stringify({
+      geminiApiKey: state.config.geminiApiKey || '',
+      importProxyUrl: state.config.importProxyUrl || ''
+    });
+    
+    if (fileId) {
+      // Update existing file
+      await this.driveRequest(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: bodyContent
+      });
+    } else {
+      // Create new file metadata first
+      const metaResp = await this.driveRequest('https://www.googleapis.com/drive/v3/files', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'config.json',
           parents: [folderId],
           mimeType: 'application/json'
         })
