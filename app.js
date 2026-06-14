@@ -902,6 +902,24 @@ const app = {
     this.switchRecipeTab('ingredients');
     this.renderIngredientsList();
     this.renderStepsList();
+
+    // Render gallery tab
+    const galleryCountEl = document.getElementById('detail-gallery-count');
+    const galleryGrid = document.getElementById('detail-gallery-grid');
+    if (galleryGrid && galleryCountEl) {
+      galleryGrid.innerHTML = '';
+      const additionalImageIds = recipe.additionalImageIds || [];
+      galleryCountEl.textContent = additionalImageIds.length;
+      additionalImageIds.forEach((id, index) => {
+        const item = document.createElement('div');
+        item.className = 'gallery-item';
+        const imgId = `gallery-img-${id}`;
+        item.innerHTML = `<img id="${imgId}" src="${this.getRecipeSVGPlaceholder()}" alt="Photo galerie ${index + 1}">`;
+        item.onclick = () => this.openLightbox(id);
+        galleryGrid.appendChild(item);
+        this.displayDriveImage(id, imgId);
+      });
+    }
     
     this.navigate('detail');
   },
@@ -975,12 +993,34 @@ const app = {
       card.id = `step-card-${index}`;
       card.onclick = () => this.handleStepClick(index);
       
+      let stepText = '';
+      let imageId = null;
+      if (typeof step === 'string') {
+        stepText = step;
+      } else if (step && typeof step === 'object') {
+        stepText = step.text || '';
+        imageId = step.imageId || null;
+      }
+      
+      const imgId = `step-img-${index}`;
+      
       card.innerHTML = `
         <div class="step-number">${index + 1}</div>
-        <div class="step-text">${step}</div>
+        <div class="step-content">
+          <div class="step-text">${stepText}</div>
+          ${imageId ? `
+            <div class="step-card-img-container">
+              <img id="${imgId}" class="step-card-img" alt="Photo étape ${index + 1}" onclick="event.stopPropagation(); app.openLightbox('${imageId}')">
+            </div>
+          ` : ''}
+        </div>
       `;
       
       list.appendChild(card);
+      
+      if (imageId) {
+        this.displayDriveImage(imageId, imgId);
+      }
     });
   },
 
@@ -1049,6 +1089,10 @@ const app = {
     const preview = document.getElementById('form-image-preview');
     preview.src = this.getRecipeSVGPlaceholder();
     
+    // Additional gallery
+    state.selectedAdditionalImages = [];
+    this.renderFormAdditionalGallery();
+    
     // Add first rows
     this.addFormIngredientRow();
     this.addFormStepRow();
@@ -1108,6 +1152,13 @@ const app = {
       preview.src = this.getRecipeSVGPlaceholder();
     }
     
+    // Load Additional Gallery
+    state.selectedAdditionalImages = (recipe.additionalImageIds || []).map(id => ({
+      id: id,
+      existing: true
+    }));
+    this.renderFormAdditionalGallery();
+    
     this.navigate('form');
   },
 
@@ -1141,18 +1192,76 @@ const app = {
     container.appendChild(row);
   },
 
-  addFormStepRow(text = '') {
+  addFormStepRow(data = null) {
     const container = document.getElementById('form-steps-list');
     const li = document.createElement('li');
     li.className = 'form-row-step';
     
+    let text = '';
+    let existingImageId = null;
+    if (typeof data === 'string') {
+      text = data;
+    } else if (data && typeof data === 'object') {
+      text = data.text || '';
+      existingImageId = data.imageId || null;
+    }
+    
+    if (existingImageId) {
+      li.dataset.existingImageId = existingImageId;
+    }
+    
+    const thumbId = 'step-thumb-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+    
     li.innerHTML = `
+      <div class="form-row-step-image-section">
+        <div class="form-row-step-thumb" id="${thumbId}" title="Ajouter/Changer la photo de l'étape">
+          ${existingImageId ? `<img src="" alt="Aperçu étape">` : `<i class="fa-solid fa-camera add-icon"></i>`}
+        </div>
+        <button type="button" class="btn-step-img-delete ${existingImageId ? '' : 'hidden'}" title="Supprimer la photo de l'étape">Suppr.</button>
+        <input type="file" accept="image/*" class="hidden form-step-file-input">
+      </div>
       <textarea rows="2" placeholder="Décrivez cette étape de préparation..." required>${text}</textarea>
-      <button type="button" class="btn-icon" onclick="this.parentElement.remove()" title="Supprimer">
+      <button type="button" class="btn-icon btn-step-delete" title="Supprimer l'étape">
         <i class="fa-solid fa-trash text-primary"></i>
       </button>
     `;
+    
     container.appendChild(li);
+    
+    const thumb = li.querySelector('.form-row-step-thumb');
+    const fileInput = li.querySelector('.form-step-file-input');
+    const deleteImgBtn = li.querySelector('.btn-step-img-delete');
+    const deleteStepBtn = li.querySelector('.btn-step-delete');
+    
+    if (existingImageId) {
+      const img = thumb.querySelector('img');
+      img.id = 'img-el-' + thumbId;
+      this.displayDriveImage(existingImageId, img.id);
+    }
+    
+    thumb.onclick = () => fileInput.click();
+    
+    fileInput.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      li.imageFile = file;
+      thumb.innerHTML = `<img id="img-el-${thumbId}" src="${URL.createObjectURL(file)}" alt="Aperçu étape">`;
+      deleteImgBtn.classList.remove('hidden');
+    };
+    
+    deleteImgBtn.onclick = (e) => {
+      e.stopPropagation();
+      li.imageFile = null;
+      delete li.dataset.existingImageId;
+      thumb.innerHTML = `<i class="fa-solid fa-camera add-icon"></i>`;
+      deleteImgBtn.classList.add('hidden');
+      fileInput.value = '';
+    };
+
+    deleteStepBtn.onclick = () => {
+      li.remove();
+    };
   },
 
   cancelForm() {
@@ -1168,14 +1277,9 @@ const app = {
     const file = event.target.files[0];
     if (!file) return;
     
-    // Compress and show local preview
-    this.showLoader('Optimisation de la photo...');
-    this.compressAndResizeImage(file, (resizedBlob) => {
-      state.selectedImageBlob = resizedBlob;
-      const preview = document.getElementById('form-image-preview');
-      preview.src = URL.createObjectURL(resizedBlob);
-      this.hideLoader();
-    });
+    state.selectedImageBlob = file;
+    const preview = document.getElementById('form-image-preview');
+    preview.src = URL.createObjectURL(file);
   },
 
   // Compress and resize image using HTML5 Canvas
@@ -1229,6 +1333,7 @@ const app = {
     
     const recipeId = document.getElementById('form-recipe-id').value;
     const isEdit = !!recipeId;
+    const finalRecipeId = isEdit ? recipeId : 'recipe_' + Date.now();
     
     // Collect ingredients
     const ingredients = [];
@@ -1240,36 +1345,16 @@ const app = {
       }
     });
 
-    // Collect steps
-    const steps = [];
-    document.querySelectorAll('#form-steps-list .form-row-step textarea').forEach(txt => {
-      const stepText = txt.value.trim();
-      if (stepText) {
-        steps.push(stepText);
-      }
-    });
-
     // Build or update recipe object
     let recipe;
     if (isEdit) {
       recipe = state.recipes.find(r => r.id === recipeId);
     } else {
       recipe = {
-        id: 'recipe_' + Date.now(),
+        id: finalRecipeId,
         createdAt: new Date().toISOString()
       };
     }
-    
-    recipe.title = formTitle;
-    recipe.description = document.getElementById('form-description').value.trim();
-    recipe.category = document.getElementById('form-category').value;
-    recipe.servings = parseInt(document.getElementById('form-servings').value) || 4;
-    recipe.prepTime = parseInt(document.getElementById('form-prep-time').value) || 0;
-    recipe.cookTime = parseInt(document.getElementById('form-cook-time').value) || 0;
-    recipe.tags = document.getElementById('form-tags').value.split(',').map(t => t.trim()).filter(t => t);
-    recipe.ingredients = ingredients;
-    recipe.steps = steps;
-    recipe.updatedAt = new Date().toISOString();
 
     try {
       // 1. Upload photo to Google Drive first if selected
@@ -1279,6 +1364,57 @@ const app = {
         recipe.imageId = imageId;
       }
       
+      // 1.2. Upload additional gallery photos if selected
+      const additionalImageIds = [];
+      if (state.selectedAdditionalImages) {
+        for (let i = 0; i < state.selectedAdditionalImages.length; i++) {
+          const item = state.selectedAdditionalImages[i];
+          if (item.existing) {
+            additionalImageIds.push(item.id);
+          } else {
+            const imgName = `${recipe.id}_gallery_${Date.now()}_${i}.jpg`;
+            const newId = await this.uploadImageToDrive(item.file, imgName);
+            additionalImageIds.push(newId);
+          }
+        }
+      }
+      recipe.additionalImageIds = additionalImageIds;
+
+      // 1.3. Upload step images and collect steps
+      const steps = [];
+      const stepRows = document.querySelectorAll('#form-steps-list .form-row-step');
+      for (let i = 0; i < stepRows.length; i++) {
+        const row = stepRows[i];
+        const textVal = row.querySelector('textarea').value.trim();
+        if (textVal) {
+          let imageId = row.dataset.existingImageId || null;
+          if (row.imageFile) {
+            const stepImgName = `${recipe.id}_step_${Date.now()}_${i}.jpg`;
+            imageId = await this.uploadImageToDrive(row.imageFile, stepImgName);
+          }
+          
+          if (imageId) {
+            steps.push({
+              text: textVal,
+              imageId: imageId
+            });
+          } else {
+            steps.push(textVal);
+          }
+        }
+      }
+      recipe.steps = steps;
+      
+      recipe.title = formTitle;
+      recipe.description = document.getElementById('form-description').value.trim();
+      recipe.category = document.getElementById('form-category').value;
+      recipe.servings = parseInt(document.getElementById('form-servings').value) || 4;
+      recipe.prepTime = parseInt(document.getElementById('form-prep-time').value) || 0;
+      recipe.cookTime = parseInt(document.getElementById('form-cook-time').value) || 0;
+      recipe.tags = document.getElementById('form-tags').value.split(',').map(t => t.trim()).filter(t => t);
+      recipe.ingredients = ingredients;
+      recipe.updatedAt = new Date().toISOString();
+
       // 2. Insert or update in local list
       if (!isEdit) {
         state.recipes.push(recipe);
@@ -1567,10 +1703,8 @@ const app = {
               const byteArray = new Uint8Array(byteNumbers);
               const imgBlob = new Blob([byteArray], { type: mimeType });
               
-              this.compressAndResizeImage(imgBlob, (resizedBlob) => {
-                state.selectedImageBlob = resizedBlob;
-                document.getElementById('form-image-preview').src = URL.createObjectURL(resizedBlob);
-              });
+              state.selectedImageBlob = imgBlob;
+              document.getElementById('form-image-preview').src = URL.createObjectURL(imgBlob);
             } catch (imgErr) {
               console.warn('Failed to process base64 image from proxy', imgErr);
             }
@@ -1578,10 +1712,8 @@ const app = {
             this.showAiLoading('Téléchargement de la photo de la recette...');
             try {
               const imgBlob = await this.fetchBlobWithFallback(parsedRecipe.imageUrl);
-              this.compressAndResizeImage(imgBlob, (resizedBlob) => {
-                state.selectedImageBlob = resizedBlob;
-                document.getElementById('form-image-preview').src = URL.createObjectURL(resizedBlob);
-              });
+              state.selectedImageBlob = imgBlob;
+              document.getElementById('form-image-preview').src = URL.createObjectURL(imgBlob);
             } catch (imgErr) {
               console.warn('Failed to fetch recipe image', imgErr);
             }
@@ -1612,10 +1744,8 @@ const app = {
             this.showAiLoading('Téléchargement de la photo de la recette...');
             try {
               const imgBlob = await this.fetchBlobWithFallback(parsedRecipe.imageUrl);
-              this.compressAndResizeImage(imgBlob, (resizedBlob) => {
-                state.selectedImageBlob = resizedBlob;
-                document.getElementById('form-image-preview').src = URL.createObjectURL(resizedBlob);
-              });
+              state.selectedImageBlob = imgBlob;
+              document.getElementById('form-image-preview').src = URL.createObjectURL(imgBlob);
             } catch (imgErr) {
               console.warn('Failed to fetch recipe image', imgErr);
             }
@@ -1691,10 +1821,8 @@ const app = {
             this.showAiLoading('Téléchargement de la photo de la recette...');
             try {
               const imgBlob = await this.fetchBlobWithFallback(parsedRecipe.imageUrl);
-              this.compressAndResizeImage(imgBlob, (resizedBlob) => {
-                state.selectedImageBlob = resizedBlob;
-                document.getElementById('form-image-preview').src = URL.createObjectURL(resizedBlob);
-              });
+              state.selectedImageBlob = imgBlob;
+              document.getElementById('form-image-preview').src = URL.createObjectURL(imgBlob);
             } catch (imgErr) {
               console.warn('Failed to fetch recipe image', imgErr);
             }
@@ -2064,5 +2192,76 @@ const app = {
         <text x="50%" y="240" fill="%23a8a29e" font-family="'Outfit', sans-serif" font-size="16" font-weight="600" text-anchor="middle">Aucune photo</text>
       </svg>
     `);
+  },
+
+  addAdditionalFormPhoto(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    if (!state.selectedAdditionalImages) {
+      state.selectedAdditionalImages = [];
+    }
+    
+    state.selectedAdditionalImages.push({
+      id: 'temp_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+      file: file,
+      existing: false
+    });
+    
+    this.renderFormAdditionalGallery();
+    event.target.value = '';
+  },
+
+  renderFormAdditionalGallery() {
+    const container = document.getElementById('form-additional-gallery-container');
+    if (!container) return;
+    container.querySelectorAll('.form-gallery-item').forEach(el => el.remove());
+    
+    const addButton = container.querySelector('.add-gallery-item-btn');
+    const images = state.selectedAdditionalImages || [];
+    
+    images.forEach(item => {
+      const itemEl = document.createElement('div');
+      itemEl.className = 'form-gallery-item';
+      
+      const imgEl = document.createElement('img');
+      imgEl.id = `form-gallery-img-${item.id}`;
+      itemEl.appendChild(imgEl);
+      
+      if (item.existing) {
+        this.displayDriveImage(item.id, imgEl.id);
+      } else {
+        imgEl.src = URL.createObjectURL(item.file);
+      }
+      
+      const deleteBtn = document.createElement('button');
+      deleteBtn.type = 'button';
+      deleteBtn.className = 'form-gallery-item-delete';
+      deleteBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+      deleteBtn.onclick = () => {
+        state.selectedAdditionalImages = state.selectedAdditionalImages.filter(x => x.id !== item.id);
+        this.renderFormAdditionalGallery();
+      };
+      
+      itemEl.appendChild(deleteBtn);
+      container.insertBefore(itemEl, addButton);
+    });
+  },
+
+  async openLightbox(imageId) {
+    const modal = document.getElementById('lightbox-modal');
+    const img = document.getElementById('lightbox-img');
+    if (!modal || !img) return;
+    modal.classList.remove('hidden');
+    
+    img.src = this.getRecipeSVGPlaceholder();
+    await this.displayDriveImage(imageId, 'lightbox-img');
+  },
+
+  closeLightbox() {
+    const modal = document.getElementById('lightbox-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+    }
   }
 };
