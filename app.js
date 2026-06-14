@@ -42,7 +42,7 @@ const app = {
     this.navigate('catalog');
     
     // Try to load cached recipes first
-    this.loadCachedRecipes();
+    await this.loadCachedRecipes();
     
     // Check if Google Drive is configured (needs client ID)
     if (!state.config.googleClientId) {
@@ -458,6 +458,12 @@ const app = {
     const imgEl = document.getElementById(imgElementId);
     if (!imgEl) return;
     
+    // If it's a local asset path (from imported Mealie ZIP backup), display directly
+    if (fileId.startsWith('images/') || fileId.includes('.webp') || fileId.includes('.jpg') || fileId.includes('.png')) {
+      imgEl.src = fileId;
+      return;
+    }
+    
     // 1. Check local IndexedDB cache first
     const cachedBlob = await this.getCachedImage(fileId);
     if (cachedBlob) {
@@ -485,11 +491,27 @@ const app = {
   },
 
   // --- Local Offline Cache ---
-  loadCachedRecipes() {
+  async loadCachedRecipes() {
     const cached = localStorage.getItem('marmite_recipes_cache');
     if (cached) {
-      state.recipes = JSON.parse(cached);
-      this.renderCatalog();
+      const parsed = JSON.parse(cached);
+      if (parsed && parsed.length > 0) {
+        state.recipes = parsed;
+        this.renderCatalog();
+        return;
+      }
+    }
+    
+    // Fallback: fetch recipes.json if cache is missing or empty
+    try {
+      const response = await fetch('recipes.json?t=' + Date.now());
+      if (response.ok) {
+        state.recipes = await response.json();
+        this.saveRecipesLocally();
+        this.renderCatalog();
+      }
+    } catch (err) {
+      console.log('No default recipes.json found', err);
     }
   },
 
@@ -505,6 +527,31 @@ const app = {
     this.renderCatalog();
     document.getElementById('stats-local-count').textContent = 0;
     this.showToast('Données et photos effacées du cache local', 'info');
+  },
+
+  async importLocalRecipesFile() {
+    this.showLoader('Importation des recettes de sauvegarde...');
+    try {
+      const response = await fetch('recipes.json?t=' + Date.now());
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.length > 0) {
+          state.recipes = data;
+          this.saveRecipesLocally();
+          this.renderCatalog();
+          this.showToast(`${data.length} recettes importées avec succès !`, 'success');
+        } else {
+          this.showToast('Le fichier recipes.json est vide.', 'warning');
+        }
+      } else {
+        throw new Error(`Erreur HTTP ${response.status}`);
+      }
+    } catch (err) {
+      console.error(err);
+      this.showToast('Impossible de charger recipes.json : ' + err.message, 'error');
+    } finally {
+      this.hideLoader();
+    }
   },
 
   // --- Catalog Rendering & Filtering ---
