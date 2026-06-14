@@ -424,11 +424,17 @@
       </div>
 
       <div class="settings-body">
-        <!-- Connection Card -->
+        <!-- Connection Card & Client ID -->
         <div class="settings-card">
           <h3><i class="fa-solid fa-cloud"></i> Compte Google Drive</h3>
-          <p class="settings-desc">Toutes vos recettes et images sont enregistrées de manière privée sur votre espace Google Drive.</p>
+          <p class="settings-desc">Saisissez votre Client ID Google OAuth pour autoriser l'application, puis connectez-vous pour enregistrer vos recettes de manière privée sur votre espace Google Drive.</p>
           
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label for="setting-client-id">Google Client ID</label>
+            <input type="text" id="setting-client-id" placeholder="Ex: xxxxxxx-xxxxxxx.apps.googleusercontent.com" onchange="app.saveSettings()">
+            <p class="input-hint">Nécessaire pour connecter l'application à votre compte Google Drive.</p>
+          </div>
+
           <div id="gdrive-status-disconnected" class="gdrive-status-box error">
             <i class="fa-solid fa-triangle-exclamation"></i>
             <span>Google Drive non connecté</span>
@@ -448,18 +454,6 @@
             <button id="btn-gdrive-logout" class="btn btn-secondary hidden" onclick="app.logoutGoogleDrive()">
               <i class="fa-solid fa-right-from-bracket"></i> Se déconnecter
             </button>
-          </div>
-        </div>
-
-        <!-- Google Drive Configuration -->
-        <div class="settings-card">
-          <h3><i class="fa-solid fa-gears"></i> Paramètres Google API</h3>
-          <p class="settings-desc">Saisissez votre Client ID Google OAuth. C'est nécessaire pour autoriser l'application à accéder à Google Drive.</p>
-          
-          <div class="form-group">
-            <label for="setting-client-id">Google Client ID</label>
-            <input type="text" id="setting-client-id" placeholder="Ex: xxxxxxx-xxxxxxx.apps.googleusercontent.com" onchange="app.saveSettings()">
-            <p class="input-hint">Nécessaire si vous hébergez vous-même l'application sur un autre domaine.</p>
           </div>
         </div>
 

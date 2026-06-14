@@ -59,7 +59,7 @@ const app = {
       this.navigate('settings');
     } else {
       if (this.isUserConnected()) {
-        await this.syncData(true); // Silent background sync on startup
+        this.syncData(true); // Silent background sync on startup (async)
       } else {
         this.showToast('Google Drive non connecté. Session expirée ou non démarrée.', 'info');
       }
@@ -1816,17 +1816,20 @@ const app = {
       // 3. Save local cache
       this.saveRecipesLocally();
       
-      // 4. Synchronize back to Google Drive
-      if (this.isUserConnected()) {
-        await this.uploadRecipesFile(state.config.folderId);
-        this.showToast('Recette enregistrée et synchronisée !', 'success');
-      } else {
-        this.showToast('Enregistré localement (hors-ligne)', 'info');
-      }
-      
       this.renderCatalog();
       this.openRecipeDetail(recipe.id);
       this.hideLoader();
+      
+      // 4. Synchronize back to Google Drive in background
+      if (this.isUserConnected()) {
+        this.syncData(true).then(() => {
+          this.showToast('Recette enregistrée et synchronisée !', 'success');
+        }).catch(err => {
+          console.error('Background saving sync failed', err);
+        });
+      } else {
+        this.showToast('Enregistré localement (hors-ligne)', 'info');
+      }
     } catch (err) {
       console.error(err);
       this.showToast(`Erreur lors de la sauvegarde : ${err.message}`, 'error');
@@ -1837,8 +1840,6 @@ const app = {
   async deleteRecipe(recipeId) {
     if (!confirm('Voulez-vous archiver cette recette ? Elle pourra être restaurée ou supprimée définitivement depuis les archives.')) return;
     
-    this.showLoader('Archivage de la recette...');
-    
     try {
       const recipe = state.recipes.find(r => r.id === recipeId);
       if (recipe) {
@@ -1846,26 +1847,26 @@ const app = {
         recipe.updatedAt = new Date().toISOString();
         this.saveRecipesLocally();
         
+        this.renderCatalog();
+        this.navigate('catalog');
+
         if (this.isUserConnected()) {
-          await this.syncData(true);
-          this.showToast('Recette archivée et synchronisée !', 'success');
+          this.syncData(true).then(() => {
+            this.showToast('Recette archivée et synchronisée !', 'success');
+          }).catch(err => {
+            console.error('Background archiving sync failed', err);
+          });
         } else {
           this.showToast('Archivée localement (hors-ligne)', 'info');
         }
-        
-        this.renderCatalog();
-        this.navigate('catalog');
       }
     } catch (err) {
       console.error(err);
       this.showToast(`Erreur d'archivage : ${err.message}`, 'error');
-    } finally {
-      this.hideLoader();
     }
   },
 
   async restoreRecipe(recipeId) {
-    this.showLoader('Restauration de la recette...');
     try {
       const recipe = state.recipes.find(r => r.id === recipeId);
       if (recipe) {
@@ -1873,27 +1874,26 @@ const app = {
         recipe.updatedAt = new Date().toISOString();
         this.saveRecipesLocally();
         
+        this.renderArchives();
+        
         if (this.isUserConnected()) {
-          await this.syncData(true);
-          this.showToast('Recette restaurée et synchronisée !', 'success');
+          this.syncData(true).then(() => {
+            this.showToast('Recette restaurée et synchronisée !', 'success');
+          }).catch(err => {
+            console.error('Background restoration sync failed', err);
+          });
         } else {
           this.showToast('Restaurée localement (hors-ligne)', 'info');
         }
-        
-        this.renderArchives();
       }
     } catch (err) {
       console.error(err);
       this.showToast(`Erreur lors de la restauration : ${err.message}`, 'error');
-    } finally {
-      this.hideLoader();
     }
   },
 
   async deleteRecipePermanently(recipeId) {
     if (!confirm('Voulez-vous vraiment supprimer définitivement cette recette ? Cette action est irréversible.')) return;
-    
-    this.showLoader('Suppression définitive...');
     
     try {
       const recipe = state.recipes.find(r => r.id === recipeId);
@@ -1915,21 +1915,21 @@ const app = {
         }
         
         this.saveRecipesLocally();
+        this.renderArchives();
         
         if (this.isUserConnected()) {
-          await this.syncData(true);
-          this.showToast('Recette supprimée définitivement', 'success');
+          this.syncData(true).then(() => {
+            this.showToast('Recette supprimée définitivement', 'success');
+          }).catch(err => {
+            console.error('Background permanent deletion sync failed', err);
+          });
         } else {
           this.showToast('Supprimée définitivement localement (hors-ligne)', 'info');
         }
-        
-        this.renderArchives();
       }
     } catch (err) {
       console.error(err);
       this.showToast(`Erreur lors de la suppression : ${err.message}`, 'error');
-    } finally {
-      this.hideLoader();
     }
   },
 
