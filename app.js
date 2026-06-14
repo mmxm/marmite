@@ -44,7 +44,7 @@ const app = {
     // Dynamic version injection
     const versionDisplay = document.getElementById('app-version-display');
     if (versionDisplay) {
-      versionDisplay.textContent = `Marmite PWA v${this.version}`;
+      versionDisplay.textContent = `Yumi PWA v${this.version}`;
     }
     
     // Initial Route
@@ -100,7 +100,7 @@ const app = {
         e.preventDefault();
         this.deferredPrompt = e;
         
-        instruction.textContent = 'Installez Marmite sur votre appareil pour cuisiner hors-ligne à tout moment !';
+        instruction.textContent = 'Installez Yumi sur votre appareil pour cuisiner hors-ligne à tout moment !';
         installBtn.classList.remove('hidden');
         banner.classList.remove('hidden');
         
@@ -145,7 +145,7 @@ const app = {
           const updateInstruction = document.getElementById('pwa-update-instruction');
           if (updateBanner) {
             if (updateInstruction) {
-              updateInstruction.textContent = `Une version plus récente de Marmite (v${manifest.version}) est disponible. Installez-la pour profiter des dernières nouveautés.`;
+              updateInstruction.textContent = `Une version plus récente de Yumi (v${manifest.version}) est disponible. Installez-la pour profiter des dernières nouveautés.`;
             }
             updateBanner.classList.remove('hidden');
           }

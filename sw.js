@@ -1,4 +1,4 @@
-const CACHE_NAME = 'marmite-v6';
+const CACHE_NAME = 'yumi-v6';
 const ASSETS = [
   './',
   './index.html',

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Marmite - Carnet de Recettes Intelligent</title>
+  <title>Yumi - Carnet de Recettes Intelligent</title>
   
   <!-- SEO & PWA Meta -->
   <meta name="description" content="Un carnet de recettes moderne avec import par IA et hébergé sur votre Google Drive.">
@@ -27,7 +27,7 @@
   <!-- Global App Loading Overlay -->
   <div id="app-loader" class="loader-overlay active">
     <div class="loader-spinner"></div>
-    <p id="loader-text">Chargement de Marmite...</p>
+    <p id="loader-text">Chargement de Yumi...</p>
   </div>
 
   <!-- Main Container -->
@@ -37,7 +37,7 @@
     <header class="app-header">
       <div class="header-logo" onclick="app.navigate('catalog')">
         <i class="fa-solid fa-fire-burner text-primary"></i>
-        <h1>Marmite</h1>
+        <h1>Yumi</h1>
       </div>
       <div class="header-actions">
         <button id="btn-sync" class="btn-icon" title="Synchroniser avec Google Drive" onclick="app.syncData()">
@@ -266,7 +266,7 @@
                 <i class="fa-solid fa-wand-magic-sparkles"></i> Analyser le texte
               </button>
             </div>
-            <p class="input-hint">Astuce : Si le lien est bloqué par le site, copiez tout le texte de la page et collez-le ici. Si vous collez le code source HTML, Marmite extraira les métadonnées structurées sans IA.</p>
+            <p class="input-hint">Astuce : Si le lien est bloqué par le site, copiez tout le texte de la page et collez-le ici. Si vous collez le code source HTML, Yumi extraira les métadonnées structurées sans IA.</p>
           </div>
           
           <!-- AI Loading State -->
@@ -517,7 +517,7 @@
 
         <!-- Version & Credits -->
         <div class="settings-version">
-          <p id="app-version-display">Marmite PWA v1.0.0</p>
+          <p id="app-version-display">Yumi PWA v1.0.0</p>
           <p>Créé par Antigravity • Sans Serveur</p>
         </div>
       </div>
@@ -542,10 +542,10 @@
   <div id="pwa-install-banner" class="pwa-banner hidden">
     <div class="pwa-banner-content">
       <div class="pwa-banner-logo">
-        <img src="icons/icon-192-light.png" alt="Marmite Logo">
+        <img src="icons/icon-192-light.png" alt="Yumi Logo">
       </div>
       <div class="pwa-banner-text">
-        <h4>Installer Marmite</h4>
+        <h4>Installer Yumi</h4>
         <p id="pwa-install-instruction">Installez l'application pour l'utiliser hors-ligne à tout moment.</p>
       </div>
       <div class="pwa-banner-actions">
@@ -561,11 +561,11 @@
   <div id="pwa-update-banner" class="pwa-banner hidden">
     <div class="pwa-banner-content">
       <div class="pwa-banner-logo">
-        <img src="icons/icon-192-light.png" alt="Marmite Logo">
+        <img src="icons/icon-192-light.png" alt="Yumi Logo">
       </div>
       <div class="pwa-banner-text">
         <h4 id="pwa-update-title">Mise à jour disponible</h4>
-        <p id="pwa-update-instruction">Une version plus récente de Marmite est disponible. Installez-la pour profiter des dernières nouveautés.</p>
+        <p id="pwa-update-instruction">Une version plus récente de Yumi est disponible. Installez-la pour profiter des dernières nouveautés.</p>
       </div>
       <div class="pwa-banner-actions">
         <button id="btn-pwa-update" class="btn btn-primary btn-sm" onclick="app.forceAppUpdate()">Mettre à jour</button>
