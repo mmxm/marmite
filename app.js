@@ -2548,7 +2548,7 @@ const app = {
 
   // Default placeholder image for recipes with no cover photo
   getRecipeSVGPlaceholder() {
-    return 'icons/icon-192.png';
+    return 'icons/icon-192-light.png';
   },
 
   addAdditionalFormPhoto(event) {

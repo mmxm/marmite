@@ -1,4 +1,4 @@
-const CACHE_NAME = 'marmite-v3';
+const CACHE_NAME = 'marmite-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -6,6 +6,7 @@ const ASSETS = [
   './app.js',
   './manifest.json',
   './icons/icon-192.png',
+  './icons/icon-192-light.png',
   'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
 ];
