@@ -1,6 +1,7 @@
 {
   "short_name": "Marmite",
   "name": "Marmite - Carnet de Recettes Intelligent",
+  "version": "1.1.0",
   "icons": [
     {
       "src": "icons/icon-192.png",

@@ -523,7 +523,7 @@
 
         <!-- Version & Credits -->
         <div class="settings-version">
-          <p>Marmite PWA v1.0.0</p>
+          <p id="app-version-display">Marmite PWA v1.0.0</p>
           <p>Créé par Antigravity • Sans Serveur</p>
         </div>
       </div>
@@ -557,6 +557,25 @@
       <div class="pwa-banner-actions">
         <button id="btn-pwa-install" class="btn btn-primary btn-sm">Installer</button>
         <button id="btn-pwa-close" class="btn-icon pwa-close-btn" title="Fermer" onclick="app.dismissInstallBanner()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PWA Update Banner -->
+  <div id="pwa-update-banner" class="pwa-banner hidden">
+    <div class="pwa-banner-content">
+      <div class="pwa-banner-logo">
+        <img src="icons/icon-192-light.png" alt="Marmite Logo">
+      </div>
+      <div class="pwa-banner-text">
+        <h4 id="pwa-update-title">Mise à jour disponible</h4>
+        <p id="pwa-update-instruction">Une version plus récente de Marmite est disponible. Installez-la pour profiter des dernières nouveautés.</p>
+      </div>
+      <div class="pwa-banner-actions">
+        <button id="btn-pwa-update" class="btn btn-primary btn-sm" onclick="app.forceAppUpdate()">Mettre à jour</button>
+        <button id="btn-pwa-update-close" class="btn-icon pwa-close-btn" title="Fermer" onclick="app.dismissUpdateBanner()">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>

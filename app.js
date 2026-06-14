@@ -32,6 +32,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 const app = {
+  version: '1.1.0',
   // --- Lifecyle ---
   async init() {
     this.registerServiceWorker();
@@ -39,6 +40,12 @@ const app = {
     this.initIndexedDB();
     this.setupEventListeners();
     this.checkGoogleSession();
+    
+    // Dynamic version injection
+    const versionDisplay = document.getElementById('app-version-display');
+    if (versionDisplay) {
+      versionDisplay.textContent = `Marmite PWA v${this.version}`;
+    }
     
     // Initial Route
     this.navigate('catalog');
@@ -58,6 +65,7 @@ const app = {
       }
     }
     this.initPwaInstallPrompt();
+    this.checkAppVersion();
     this.hideLoader();
   },
 
@@ -117,6 +125,76 @@ const app = {
       banner.classList.add('hidden');
     }
     sessionStorage.setItem('marmite_pwa_dismissed', 'true');
+  },
+
+  async checkAppVersion() {
+    if (sessionStorage.getItem('marmite_pwa_update_dismissed')) return;
+
+    try {
+      const response = await fetch('manifest.json?t=' + Date.now());
+      if (response.ok) {
+        const manifest = await response.json();
+        if (manifest.version && manifest.version !== this.version) {
+          // Hide install banner to avoid overlaps
+          const installBanner = document.getElementById('pwa-install-banner');
+          if (installBanner) {
+            installBanner.classList.add('hidden');
+          }
+
+          const updateBanner = document.getElementById('pwa-update-banner');
+          const updateInstruction = document.getElementById('pwa-update-instruction');
+          if (updateBanner) {
+            if (updateInstruction) {
+              updateInstruction.textContent = `Une version plus récente de Marmite (v${manifest.version}) est disponible. Installez-la pour profiter des dernières nouveautés.`;
+            }
+            updateBanner.classList.remove('hidden');
+          }
+        }
+      }
+    } catch (err) {
+      console.log('Failed to check app version from manifest.json', err);
+    }
+  },
+
+  async forceAppUpdate() {
+    this.showLoader('Mise à jour de l\'application...');
+    
+    // 1. Unregister all service workers
+    if ('serviceWorker' in navigator) {
+      try {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const registration of registrations) {
+          await registration.unregister();
+        }
+        console.log('[PWA] Service Workers unregistered');
+      } catch (err) {
+        console.error('Failed to unregister Service Worker', err);
+      }
+    }
+    
+    // 2. Clear all cache storage
+    if ('caches' in window) {
+      try {
+        const keys = await caches.keys();
+        for (const key of keys) {
+          await caches.delete(key);
+        }
+        console.log('[PWA] Cache Storage cleared');
+      } catch (err) {
+        console.error('Failed to clear caches', err);
+      }
+    }
+    
+    // 3. Reload window bypassing browser cache
+    window.location.reload();
+  },
+
+  dismissUpdateBanner() {
+    const banner = document.getElementById('pwa-update-banner');
+    if (banner) {
+      banner.classList.add('hidden');
+    }
+    sessionStorage.setItem('marmite_pwa_update_dismissed', 'true');
   },
 
   loadConfig() {
@@ -1769,7 +1847,7 @@ const app = {
         this.saveRecipesLocally();
         
         if (this.isUserConnected()) {
-          await this.uploadRecipesFile(state.config.folderId);
+          await this.syncData(true);
           this.showToast('Recette archivée et synchronisée !', 'success');
         } else {
           this.showToast('Archivée localement (hors-ligne)', 'info');
@@ -1796,7 +1874,7 @@ const app = {
         this.saveRecipesLocally();
         
         if (this.isUserConnected()) {
-          await this.uploadRecipesFile(state.config.folderId);
+          await this.syncData(true);
           this.showToast('Recette restaurée et synchronisée !', 'success');
         } else {
           this.showToast('Restaurée localement (hors-ligne)', 'info');
@@ -1839,7 +1917,7 @@ const app = {
         this.saveRecipesLocally();
         
         if (this.isUserConnected()) {
-          await this.uploadRecipesFile(state.config.folderId);
+          await this.syncData(true);
           this.showToast('Recette supprimée définitivement', 'success');
         } else {
           this.showToast('Supprimée définitivement localement (hors-ligne)', 'info');
