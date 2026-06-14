@@ -1342,6 +1342,87 @@ const app = {
     }
   },
 
+  async importRecipeFromPaste() {
+    const rawText = document.getElementById('wizard-paste-input').value.trim();
+    if (!rawText) {
+      this.showToast('Veuillez coller du texte ou du code source HTML', 'error');
+      return;
+    }
+    
+    this.showAiLoading('Analyse du texte collé...');
+    
+    try {
+      const isHtml = /<[a-z][\s\S]*>/i.test(rawText);
+      
+      if (isHtml) {
+        this.showAiLoading('Recherche de métadonnées structurées dans l\'HTML...');
+        const parsedRecipe = this.parseRecipeSchema(rawText);
+        if (parsedRecipe) {
+          this.applyImportedRecipe(parsedRecipe);
+          
+          if (parsedRecipe.imageUrl) {
+            this.showAiLoading('Téléchargement de la photo de la recette...');
+            try {
+              const imgBlob = await this.fetchBlobWithFallback(parsedRecipe.imageUrl);
+              this.compressAndResizeImage(imgBlob, (resizedBlob) => {
+                state.selectedImageBlob = resizedBlob;
+                document.getElementById('form-image-preview').src = URL.createObjectURL(resizedBlob);
+              });
+            } catch (imgErr) {
+              console.warn('Failed to fetch recipe image', imgErr);
+            }
+          }
+          
+          this.showToast('Recette importée à partir de l\'HTML (sans IA) !', 'success');
+          document.getElementById('wizard-paste-input').value = '';
+          this.hideAiLoading();
+          return;
+        }
+      }
+      
+      // Fallback to Gemini AI
+      if (!state.config.geminiApiKey) {
+        throw new Error('Aucune métadonnée structurée trouvée dans le code collé. Veuillez configurer une clé d\'API Gemini dans les paramètres pour pouvoir analyser du texte brut.');
+      }
+      
+      this.showAiLoading('Analyse du texte brut par Gemini...');
+      const textToAnalyze = isHtml ? this.cleanHtmlForAi(rawText) : rawText;
+      
+      const prompt = `Tu es un assistant de cuisine expert. Analyse le texte brut suivant et structure la recette sous forme de JSON correspondant à ce schéma précis :
+      {
+        "title": "Titre court",
+        "description": "Explication courte",
+        "prepTime": 15,
+        "cookTime": 30,
+        "servings": 4,
+        "category": "Entrée|Plat|Dessert|Apéritif|Boisson|Autre",
+        "tags": ["tag1", "tag2"],
+        "ingredients": [{"name": "Nom ingrédient", "quantity": 1.5, "unit": "g|kg|l|cl|ml|cuillère à soupe|sachet|unité|pincée"}],
+        "steps": ["Étape 1...", "Étape 2..."]
+      }
+      Réponds uniquement avec le JSON. Voici le texte : \n\n${textToAnalyze}`;
+
+      const payload = {
+        contents: [
+          {
+            parts: [{ text: prompt }]
+          }
+        ]
+      };
+
+      const parsedRecipe = await this.callGeminiApi(payload);
+      this.applyImportedRecipe(parsedRecipe);
+      
+      this.showToast('Recette importée via IA Gemini !', 'success');
+      document.getElementById('wizard-paste-input').value = '';
+    } catch (err) {
+      console.error(err);
+      this.showToast(`Échec de l'analyse : ${err.message}`, 'error');
+    } finally {
+      this.hideAiLoading();
+    }
+  },
+
   cleanHtmlForAi(html) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');

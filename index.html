@@ -212,6 +212,9 @@
             <button id="wizard-tab-photo" class="wizard-tab-btn" onclick="app.switchWizardTab('photo')">
               <i class="fa-solid fa-camera"></i> Par Photo
             </button>
+            <button id="wizard-tab-paste" class="wizard-tab-btn" onclick="app.switchWizardTab('paste')">
+              <i class="fa-solid fa-clipboard"></i> Copier-Coller
+            </button>
           </div>
 
           <!-- Wizard URL Import Panel -->
@@ -235,6 +238,17 @@
               </label>
               <input type="file" id="wizard-photo-file" accept="image/*" capture="environment" class="hidden" onchange="app.importRecipeFromPhoto(event)">
             </div>
+          </div>
+
+          <!-- Wizard Paste Import Panel -->
+          <div id="wizard-panel-paste" class="wizard-panel">
+            <div class="form-group" style="margin-bottom: 8px;">
+              <textarea id="wizard-paste-input" rows="4" placeholder="Collez ici le texte de la recette ou le code source HTML..."></textarea>
+              <button class="btn btn-primary" onclick="app.importRecipeFromPaste()" style="margin-top: 8px; width: 100%;">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Analyser le texte
+              </button>
+            </div>
+            <p class="input-hint">Astuce : Si le lien est bloqué par le site, copiez tout le texte de la page et collez-le ici. Si vous collez le code source HTML, Marmite extraira les métadonnées structurées sans IA.</p>
           </div>
           
           <!-- AI Loading State -->
