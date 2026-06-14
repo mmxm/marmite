@@ -52,7 +52,7 @@ const app = {
       this.navigate('settings');
     } else {
       if (this.isUserConnected()) {
-        await this.syncData();
+        await this.syncData(true); // Silent background sync on startup
       } else {
         this.showToast('Google Drive non connecté. Session expirée ou non démarrée.', 'info');
       }
@@ -117,6 +117,79 @@ const app = {
         clearBtn.classList.add('hidden');
       }
     });
+
+    // Listen to network status changes
+    window.addEventListener('online', () => {
+      this.handleNetworkStatusChange(true);
+    });
+    window.addEventListener('offline', () => {
+      this.handleNetworkStatusChange(false);
+    });
+  },
+
+  async handleNetworkStatusChange(isOnline) {
+    if (isOnline) {
+      this.showToast('Connexion Internet rétablie. Synchronisation des données...', 'success');
+      if (this.isUserConnected()) {
+        try {
+          await this.syncData(true);
+        } catch (err) {
+          console.warn('Background sync failed on network reconnect', err);
+        }
+      }
+    } else {
+      this.showToast('Mode hors-ligne activé. Les modifications seront synchronisées ultérieurement.', 'info');
+    }
+  },
+
+  mergeRecipes(localRecipes, remoteRecipes) {
+    const deletedIds = JSON.parse(localStorage.getItem('marmite_deleted_ids') || '[]');
+    const merged = [];
+    const localMap = new Map(localRecipes.map(r => [r.id, r]));
+    
+    // Filter out deleted recipes from remote list
+    const remoteRecipesFiltered = remoteRecipes.filter(r => !deletedIds.includes(r.id));
+    const remoteMap = new Map(remoteRecipesFiltered.map(r => [r.id, r]));
+    
+    const allIds = new Set([...localMap.keys(), ...remoteMap.keys()]);
+    let hasChanges = false;
+    
+    for (const id of allIds) {
+      if (deletedIds.includes(id)) {
+        hasChanges = true;
+        continue;
+      }
+      
+      const local = localMap.get(id);
+      const remote = remoteMap.get(id);
+      
+      if (local && remote) {
+        const localTime = new Date(local.updatedAt || local.createdAt || 0).getTime();
+        const remoteTime = new Date(remote.updatedAt || remote.createdAt || 0).getTime();
+        
+        if (localTime > remoteTime) {
+          merged.push(local);
+          hasChanges = true;
+        } else {
+          merged.push(remote);
+          if (localTime < remoteTime) {
+            hasChanges = true;
+          }
+        }
+      } else if (local) {
+        merged.push(local);
+        hasChanges = true;
+      } else if (remote) {
+        merged.push(remote);
+        hasChanges = true;
+      }
+    }
+    
+    if (hasChanges) {
+      localStorage.removeItem('marmite_deleted_ids');
+    }
+    
+    return { merged, hasChanges };
   },
 
   // --- IndexedDB Cache for Private Images ---
@@ -335,13 +408,22 @@ const app = {
     return response;
   },
 
-  async syncData() {
+  async syncData(silent = false) {
     if (!this.isUserConnected()) {
-      this.showToast('Veuillez d\'abord vous connecter à Google Drive', 'warning');
+      if (!silent) this.showToast('Veuillez d\'abord vous connecter à Google Drive', 'warning');
       return;
     }
     
-    this.showLoader('Synchronisation en cours...');
+    if (!navigator.onLine) {
+      if (!silent) this.showToast('Pas de connexion internet', 'info');
+      return;
+    }
+    
+    if (!silent) {
+      this.showLoader('Synchronisation en cours...');
+    } else {
+      console.log('[Auto-sync] Background sync started...');
+    }
     try {
       // 1. Get or create app folder
       if (!state.config.folderId) {
@@ -393,21 +475,36 @@ const app = {
       if (fileId) {
         // Download recipes from Google Drive
         const gRecipes = await this.downloadRecipesFile(fileId);
-        state.recipes = gRecipes || [];
+        
+        // Merge local and remote recipes to support offline changes
+        const mergedData = this.mergeRecipes(state.recipes || [], gRecipes || []);
+        state.recipes = mergedData.merged;
         this.saveRecipesLocally();
+        
+        // If local changed offline, upload back to Drive
+        if (mergedData.hasChanges) {
+          console.log('[Sync] Local/Remote difference detected, uploading merged recipes...');
+          await this.uploadRecipesFile(state.config.folderId);
+        }
       } else {
         // Upload local recipes to Google Drive
         await this.uploadRecipesFile(state.config.folderId);
       }
       
       this.renderCatalog();
-      this.showToast('Synchronisation réussie !', 'success');
+      if (!silent) {
+        this.showToast('Synchronisation réussie !', 'success');
+      }
       document.getElementById('stats-last-sync').textContent = new Date().toLocaleTimeString();
     } catch (err) {
       console.error(err);
-      this.showToast(`Échec de la synchronisation : ${err.message}`, 'error');
+      if (!silent) {
+        this.showToast(`Échec de la synchronisation : ${err.message}`, 'error');
+      }
     } finally {
-      this.hideLoader();
+      if (!silent) {
+        this.hideLoader();
+      }
     }
   },
 
@@ -1220,8 +1317,21 @@ const app = {
         state.recipes.splice(index, 1);
         this.saveRecipesLocally();
         
+        // Track offline deletion for sync
+        let deletedIds = JSON.parse(localStorage.getItem('marmite_deleted_ids') || '[]');
+        if (!deletedIds.includes(recipeId)) {
+          deletedIds.push(recipeId);
+          localStorage.setItem('marmite_deleted_ids', JSON.stringify(deletedIds));
+        }
+        
         if (this.isUserConnected()) {
           await this.uploadRecipesFile(state.config.folderId);
+          
+          // Remove from queue since we uploaded it successfully
+          let updatedQueue = JSON.parse(localStorage.getItem('marmite_deleted_ids') || '[]');
+          updatedQueue = updatedQueue.filter(id => id !== recipeId);
+          localStorage.setItem('marmite_deleted_ids', JSON.stringify(updatedQueue));
+          
           this.showToast('Recette supprimée de Google Drive', 'success');
         } else {
           this.showToast('Supprimée localement (hors-ligne)', 'info');
