@@ -1741,3 +1741,90 @@ input:checked + .slider:before {
   overflow: hidden;
   border: 1px solid var(--border);
 }
+
+/* ==========================================================================
+   RESPONSIVE DESIGN EXTENSIONS (Mobile, Tablet, Desktop)
+   ========================================================================== */
+
+/* 1. Tablet screens (768px and up) */
+@media (min-width: 768px) {
+  :root {
+    --max-width: 768px;
+  }
+
+  /* Catalog: Auto grid columns (e.g. 3 columns on tablet) */
+  .recipes-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+  }
+
+  /* Details View Grid */
+  .detail-body {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 30px;
+    align-items: start;
+  }
+
+  .detail-header-info { grid-column: 1; grid-row: 1; }
+  .metadata-grid { grid-column: 1; grid-row: 2; }
+  .portions-selector-container { grid-column: 1; grid-row: 3; }
+  #tab-ingredients { grid-column: 1; grid-row: 4; }
+
+  #tab-steps { grid-column: 2; grid-row: 1 / span 4; }
+  #tab-gallery { grid-column: 2; grid-row: 5; }
+
+  /* Hide tabs nav and display all contents on tablet/desktop */
+  .tabs-nav {
+    display: none !important;
+  }
+
+  #tab-ingredients.tab-content,
+  #tab-steps.tab-content,
+  #tab-gallery.tab-content {
+    display: block !important;
+  }
+
+  /* Adjust detail image height to balance layout */
+  .detail-hero {
+    height: 320px;
+  }
+
+  /* Form View Grid */
+  #recipe-form {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  #recipe-form input[type="hidden"] {
+    display: none !important;
+  }
+
+  #form-group-ingredients {
+    grid-column: 2;
+    grid-row: 1 / span 4;
+  }
+
+  #form-group-steps {
+    grid-column: 2;
+    grid-row: 5 / span 10;
+  }
+}
+
+/* 2. Desktop screens (1024px and up) */
+@media (min-width: 1024px) {
+  :root {
+    --max-width: 1200px;
+  }
+
+  .detail-body {
+    grid-template-columns: 380px 1fr;
+    gap: 40px;
+  }
+
+  .detail-hero {
+    height: 380px;
+  }
+}
