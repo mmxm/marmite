@@ -43,6 +43,9 @@
         <button id="btn-sync" class="btn-icon" title="Synchroniser avec Google Drive" onclick="app.syncData()">
           <i class="fa-solid fa-cloud-arrow-up"></i>
         </button>
+        <button id="btn-archives" class="btn-icon" title="Recettes archivées" onclick="app.navigate('archives')">
+          <i class="fa-solid fa-box-archive"></i>
+        </button>
         <button class="btn-icon" title="Paramètres" onclick="app.navigate('settings')">
           <i class="fa-solid fa-gear"></i>
         </button>
@@ -388,6 +391,26 @@
             </div>
           </div>
         </form>
+      </div>
+    </section>
+
+    <!-- SECTION: ARCHIVES -->
+    <section id="view-archives" class="app-view">
+      <div class="settings-header">
+        <button class="btn-icon" onclick="app.navigate('catalog')" title="Retour">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <h2>Recettes Archivées</h2>
+      </div>
+      <div class="settings-body">
+        <div id="archives-empty-state" class="empty-state hidden">
+          <i class="fa-solid fa-box-open"></i>
+          <h3>Aucune recette archivée</h3>
+          <p>Les recettes que vous archivez apparaîtront ici.</p>
+        </div>
+        <div class="recipes-grid" id="archives-grid">
+          <!-- Dynamically populated by JS -->
+        </div>
       </div>
     </section>
 

@@ -1912,3 +1912,40 @@ input:checked + .slider:before {
     height: 380px;
   }
 }
+
+/* ==========================================================================
+   VIEW: ARCHIVES & UTILITY BUTTONS
+   ========================================================================== */
+.btn-danger {
+  background-color: var(--error);
+  color: #ffffff;
+}
+.btn-danger:hover, .btn-danger:focus {
+  background-color: #f87171;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+}
+.btn-success {
+  background-color: var(--success);
+  color: #ffffff;
+}
+.btn-success:hover, .btn-success:focus {
+  background-color: #34d399;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+}
+.btn-sm {
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  border-radius: 8px;
+}
+.archive-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  width: 100%;
+}
+.archive-card-actions .btn {
+  flex: 1;
+  padding: 8px;
+  font-size: 0.75rem;
+}
+

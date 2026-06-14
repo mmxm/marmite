@@ -355,6 +355,10 @@ const app = {
       target.classList.add('active');
     }
     
+    if (viewId === 'archives') {
+      this.renderArchives();
+    }
+    
     // Customize page header or scroll resets
     window.scrollTo(0, 0);
     this.updateHeaderState();
@@ -362,7 +366,7 @@ const app = {
 
   updateHeaderState() {
     const header = document.querySelector('.app-header');
-    if (state.activeView === 'detail' || state.activeView === 'form') {
+    if (state.activeView === 'detail' || state.activeView === 'form' || state.activeView === 'archives') {
       header.classList.add('hidden');
     } else {
       header.classList.remove('hidden');
@@ -885,7 +889,7 @@ const app = {
 
   saveRecipesLocally() {
     localStorage.setItem('marmite_recipes_cache', JSON.stringify(state.recipes));
-    document.getElementById('stats-local-count').textContent = state.recipes.length;
+    document.getElementById('stats-local-count').textContent = state.recipes.filter(r => !r.archived).length;
   },
 
   clearLocalCache() {
@@ -936,6 +940,8 @@ const app = {
     const query = document.getElementById('search-input').value.toLowerCase().trim();
     
     const filtered = state.recipes.filter(recipe => {
+      // Exclude archived recipes from the main menu and search
+      if (recipe.archived) return false;
       const matchesCategory = state.activeCategory === 'Tous' || (recipe.category || 'Autre') === state.activeCategory;
       
       const titleMatch = recipe.title.toLowerCase().includes(query);
@@ -990,7 +996,7 @@ const app = {
       }
     });
 
-    document.getElementById('stats-local-count').textContent = state.recipes.length;
+    document.getElementById('stats-local-count').textContent = state.recipes.filter(r => !r.archived).length;
   },
 
   renderCategoryPills(categories) {
@@ -1692,9 +1698,65 @@ const app = {
   },
 
   async deleteRecipe(recipeId) {
-    if (!confirm('Voulez-vous vraiment supprimer cette recette ?')) return;
+    if (!confirm('Voulez-vous archiver cette recette ? Elle pourra être restaurée ou supprimée définitivement depuis les archives.')) return;
     
-    this.showLoader('Suppression de la recette...');
+    this.showLoader('Archivage de la recette...');
+    
+    try {
+      const recipe = state.recipes.find(r => r.id === recipeId);
+      if (recipe) {
+        recipe.archived = true;
+        recipe.updatedAt = new Date().toISOString();
+        this.saveRecipesLocally();
+        
+        if (this.isUserConnected()) {
+          await this.uploadRecipesFile(state.config.folderId);
+          this.showToast('Recette archivée et synchronisée !', 'success');
+        } else {
+          this.showToast('Archivée localement (hors-ligne)', 'info');
+        }
+        
+        this.renderCatalog();
+        this.navigate('catalog');
+      }
+    } catch (err) {
+      console.error(err);
+      this.showToast(`Erreur d'archivage : ${err.message}`, 'error');
+    } finally {
+      this.hideLoader();
+    }
+  },
+
+  async restoreRecipe(recipeId) {
+    this.showLoader('Restauration de la recette...');
+    try {
+      const recipe = state.recipes.find(r => r.id === recipeId);
+      if (recipe) {
+        recipe.archived = false;
+        recipe.updatedAt = new Date().toISOString();
+        this.saveRecipesLocally();
+        
+        if (this.isUserConnected()) {
+          await this.uploadRecipesFile(state.config.folderId);
+          this.showToast('Recette restaurée et synchronisée !', 'success');
+        } else {
+          this.showToast('Restaurée localement (hors-ligne)', 'info');
+        }
+        
+        this.renderArchives();
+      }
+    } catch (err) {
+      console.error(err);
+      this.showToast(`Erreur lors de la restauration : ${err.message}`, 'error');
+    } finally {
+      this.hideLoader();
+    }
+  },
+
+  async deleteRecipePermanently(recipeId) {
+    if (!confirm('Voulez-vous vraiment supprimer définitivement cette recette ? Cette action est irréversible.')) return;
+    
+    this.showLoader('Suppression définitive...');
     
     try {
       // Find index
@@ -1721,13 +1783,12 @@ const app = {
           updatedQueue = updatedQueue.filter(id => id !== recipeId);
           localStorage.setItem('marmite_deleted_ids', JSON.stringify(updatedQueue));
           
-          this.showToast('Recette supprimée de Google Drive', 'success');
+          this.showToast('Recette supprimée définitivement', 'success');
         } else {
-          this.showToast('Supprimée localement (hors-ligne)', 'info');
+          this.showToast('Supprimée définitivement localement (hors-ligne)', 'info');
         }
         
-        this.navigate('catalog');
-        this.renderCatalog();
+        this.renderArchives();
       }
     } catch (err) {
       console.error(err);
@@ -1735,6 +1796,59 @@ const app = {
     } finally {
       this.hideLoader();
     }
+  },
+
+  renderArchives() {
+    const grid = document.getElementById('archives-grid');
+    const emptyState = document.getElementById('archives-empty-state');
+    if (!grid || !emptyState) return;
+    
+    grid.innerHTML = '';
+    
+    const archived = state.recipes.filter(recipe => recipe.archived);
+    
+    if (archived.length === 0) {
+      grid.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+      return;
+    }
+    
+    grid.classList.remove('hidden');
+    emptyState.classList.add('hidden');
+    
+    archived.forEach(recipe => {
+      const card = document.createElement('div');
+      card.className = 'recipe-card archive-card';
+      
+      const imgId = `archive-img-${recipe.id}`;
+      
+      card.innerHTML = `
+        <div class="recipe-card-img-wrapper">
+          <img id="${imgId}" src="${this.getRecipeSVGPlaceholder()}" alt="${recipe.title}" class="recipe-card-img">
+          <span class="recipe-card-category">${recipe.category || 'Plat'}</span>
+        </div>
+        <div class="recipe-card-info">
+          <h4 class="recipe-card-title">${recipe.title}</h4>
+          <div class="archive-card-actions">
+            <button class="btn btn-success btn-sm" onclick="event.stopPropagation(); app.restoreRecipe('${recipe.id}')">
+              <i class="fa-solid fa-rotate-left"></i> Restaurer
+            </button>
+            <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); app.deleteRecipePermanently('${recipe.id}')">
+              <i class="fa-solid fa-trash-can"></i> Supprimer
+            </button>
+          </div>
+        </div>
+      `;
+      
+      grid.appendChild(card);
+      
+      // Load image asynchronously
+      if (recipe.imageId) {
+        this.displayDriveImage(recipe.imageId, imgId);
+      } else {
+        document.getElementById(imgId).src = this.getRecipeSVGPlaceholder();
+      }
+    });
   },
 
   // --- AI Imports (Gemini) ---

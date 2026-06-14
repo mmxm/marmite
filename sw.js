@@ -1,4 +1,4 @@
-const CACHE_NAME = 'marmite-v1';
+const CACHE_NAME = 'marmite-v2';
 const ASSETS = [
   './',
   './index.html',
