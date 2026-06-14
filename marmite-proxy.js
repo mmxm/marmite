@@ -109,7 +109,7 @@ function createJsonResponse(data) {
  */
 function parseRecipeSchema(html) {
   var scripts = [];
-  var regex = /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+  var regex = /<script[^>]*type\s*=\s*["']?application(?:&#x2F;|\/)ld(?:&#x2B;|\+)json["']?[^>]*>([\s\S]*?)<\/script>/gi;
   var match;
   while ((match = regex.exec(html)) !== null) {
     scripts.push(match[1]);
