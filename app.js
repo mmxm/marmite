@@ -195,50 +195,48 @@ const app = {
   },
 
   mergeRecipes(localRecipes, remoteRecipes) {
-    const deletedIds = JSON.parse(localStorage.getItem('marmite_deleted_ids') || '[]');
     const merged = [];
     const localMap = new Map(localRecipes.map(r => [r.id, r]));
-    
-    // Filter out deleted recipes from remote list
-    const remoteRecipesFiltered = remoteRecipes.filter(r => !deletedIds.includes(r.id));
-    const remoteMap = new Map(remoteRecipesFiltered.map(r => [r.id, r]));
+    const remoteMap = new Map(remoteRecipes.map(r => [r.id, r]));
     
     const allIds = new Set([...localMap.keys(), ...remoteMap.keys()]);
     let hasChanges = false;
     
     for (const id of allIds) {
-      if (deletedIds.includes(id)) {
-        hasChanges = true;
-        continue;
-      }
-      
       const local = localMap.get(id);
       const remote = remoteMap.get(id);
       
+      let selected = null;
       if (local && remote) {
         const localTime = new Date(local.updatedAt || local.createdAt || 0).getTime();
         const remoteTime = new Date(remote.updatedAt || remote.createdAt || 0).getTime();
         
         if (localTime > remoteTime) {
-          merged.push(local);
+          selected = local;
           hasChanges = true;
         } else {
-          merged.push(remote);
+          selected = remote;
           if (localTime < remoteTime) {
             hasChanges = true;
           }
         }
       } else if (local) {
-        merged.push(local);
+        selected = local;
         hasChanges = true;
       } else if (remote) {
-        merged.push(remote);
+        selected = remote;
         hasChanges = true;
       }
-    }
-    
-    if (hasChanges) {
-      localStorage.removeItem('marmite_deleted_ids');
+      
+      if (selected) {
+        // Trigger local image cache cleanup if marked deleted remotely
+        const localWasNotDeleted = !local || !local.deleted;
+        if (selected.deleted && localWasNotDeleted) {
+          // If we had the full recipe locally, we extract its images for cleanup
+          this.detectAndCleanupRemovedImages(local || selected, null);
+        }
+        merged.push(selected);
+      }
     }
     
     return { merged, hasChanges };
@@ -940,7 +938,7 @@ const app = {
 
   saveRecipesLocally() {
     localStorage.setItem('marmite_recipes_cache', JSON.stringify(state.recipes));
-    document.getElementById('stats-local-count').textContent = state.recipes.filter(r => !r.archived).length;
+    document.getElementById('stats-local-count').textContent = state.recipes.filter(r => !r.archived && !r.deleted).length;
   },
 
   clearLocalCache() {
@@ -984,15 +982,15 @@ const app = {
     grid.innerHTML = '';
     
     // Gather categories
-    const categories = ['Tous', ...new Set(state.recipes.map(r => r.category || 'Autre'))];
+    const categories = ['Tous', ...new Set(state.recipes.filter(r => !r.deleted).map(r => r.category || 'Autre'))];
     this.renderCategoryPills(categories);
 
     // Apply Search & Filters
     const query = document.getElementById('search-input').value.toLowerCase().trim();
     
     const filtered = state.recipes.filter(recipe => {
-      // Exclude archived recipes from the main menu and search
-      if (recipe.archived) return false;
+      // Exclude archived and deleted recipes from the main menu and search
+      if (recipe.deleted || recipe.archived) return false;
       const matchesCategory = state.activeCategory === 'Tous' || (recipe.category || 'Autre') === state.activeCategory;
       
       const titleMatch = recipe.title.toLowerCase().includes(query);
@@ -1047,7 +1045,7 @@ const app = {
       }
     });
 
-    document.getElementById('stats-local-count').textContent = state.recipes.filter(r => !r.archived).length;
+    document.getElementById('stats-local-count').textContent = state.recipes.filter(r => !r.archived && !r.deleted).length;
   },
 
   renderCategoryPills(categories) {
@@ -1080,7 +1078,7 @@ const app = {
   // --- Recipe Detail Operations ---
   openRecipeDetail(recipeId) {
     const recipe = state.recipes.find(r => r.id === recipeId);
-    if (!recipe) return;
+    if (!recipe || recipe.deleted) return;
     
     state.activeRecipe = recipe;
     state.servingsMultiplier = 1; // reset servings
@@ -1397,7 +1395,7 @@ const app = {
 
   openEditRecipeForm(recipeId) {
     const recipe = state.recipes.find(r => r.id === recipeId);
-    if (!recipe) return;
+    if (!recipe || recipe.deleted) return;
     
     state.activeRecipe = recipe;
     
@@ -1820,30 +1818,28 @@ const app = {
     this.showLoader('Suppression définitive...');
     
     try {
-      // Find index
-      const index = state.recipes.findIndex(r => r.id === recipeId);
-      if (index > -1) {
-        const recipeToDelete = state.recipes[index];
-        this.detectAndCleanupRemovedImages(recipeToDelete, null);
+      const recipe = state.recipes.find(r => r.id === recipeId);
+      if (recipe) {
+        // Build a minimal tombstone representation to optimize space in recipes.json
+        const deletedTombstone = {
+          id: recipe.id,
+          deleted: true,
+          updatedAt: new Date().toISOString()
+        };
         
-        state.recipes.splice(index, 1);
-        this.saveRecipesLocally();
+        // Clean up locally cached images immediately
+        this.detectAndCleanupRemovedImages(recipe, null);
         
-        // Track offline deletion for sync
-        let deletedIds = JSON.parse(localStorage.getItem('marmite_deleted_ids') || '[]');
-        if (!deletedIds.includes(recipeId)) {
-          deletedIds.push(recipeId);
-          localStorage.setItem('marmite_deleted_ids', JSON.stringify(deletedIds));
+        // Replace the recipe object in state with the tombstone
+        const idx = state.recipes.findIndex(r => r.id === recipeId);
+        if (idx > -1) {
+          state.recipes[idx] = deletedTombstone;
         }
+        
+        this.saveRecipesLocally();
         
         if (this.isUserConnected()) {
           await this.uploadRecipesFile(state.config.folderId);
-          
-          // Remove from queue since we uploaded it successfully
-          let updatedQueue = JSON.parse(localStorage.getItem('marmite_deleted_ids') || '[]');
-          updatedQueue = updatedQueue.filter(id => id !== recipeId);
-          localStorage.setItem('marmite_deleted_ids', JSON.stringify(updatedQueue));
-          
           this.showToast('Recette supprimée définitivement', 'success');
         } else {
           this.showToast('Supprimée définitivement localement (hors-ligne)', 'info');
@@ -1866,7 +1862,7 @@ const app = {
     
     grid.innerHTML = '';
     
-    const archived = state.recipes.filter(recipe => recipe.archived);
+    const archived = state.recipes.filter(recipe => recipe.archived && !recipe.deleted);
     
     if (archived.length === 0) {
       grid.classList.add('hidden');
