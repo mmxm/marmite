@@ -1,0 +1,1225 @@
+[
+  {
+    "id": "recipe_quatre_quarts_mamily",
+    "title": "Quatre quarts mamily",
+    "description": "",
+    "prepTime": 15,
+    "cookTime": 30,
+    "servings": 4,
+    "category": "Plat",
+    "tags": [
+      "Plat"
+    ],
+    "ingredients": [
+      {
+        "name": "oeuf",
+        "quantity": 4.0,
+        "unit": ""
+      },
+      {
+        "name": "farine",
+        "quantity": null,
+        "unit": ""
+      },
+      {
+        "name": "beurre",
+        "quantity": 100.0,
+        "unit": "g"
+      },
+      {
+        "name": "sucre",
+        "quantity": 100.0,
+        "unit": "g"
+      },
+      {
+        "name": "levure",
+        "quantity": 1.0,
+        "unit": "sachet"
+      }
+    ],
+    "steps": [
+      "Préchauffer le four à 180 degrès",
+      "Peser les 4 oeufs NON CASSÉS AVEC LEUR COQUILLE = le poids en farine \n\nPuis séparer les blancs des jaunes",
+      "Mélanger avec les jaunes :\n- le sucre\n- le beurre fondu\n- la farine\n- la levure",
+      "Battre les blancs d'œufs bien fermes\nEt les rajouter à la précédente préparation\nRajouter si l'on souhaite : du citron (7- à 10 grosses càs de jus), des pépites de chocolat...",
+      "Enfourner à 180 degrès environ 30-40min (il doit être sec au milieu)"
+    ],
+    "imageId": "",
+    "createdAt": "2025-04-05",
+    "updatedAt": "2025-04-05T14:51:11.437847"
+  },
+  {
+    "id": "recipe_tiramisu_aux_speculoos",
+    "title": "Tiramisu aux speculoos",
+    "description": "mascarpone, sucre roux, sucre vanillé, oeuf, spéculoos, café, amaretto, cacao",
+    "prepTime": 15,
+    "cookTime": 30,
+    "servings": 6,
+    "category": "Dessert",
+    "tags": [
+      "Dessert"
+    ],
+    "ingredients": [
+      {
+        "name": "sucre roux",
+        "quantity": 80.0,
+        "unit": "g"
+      },
+      {
+        "name": "sucre vanillé",
+        "quantity": 1.0,
+        "unit": "sachet"
+      },
+      {
+        "name": "oeuf",
+        "quantity": 3.0,
+        "unit": ""
+      },
+      {
+        "name": "speculoos",
+        "quantity": 300.0,
+        "unit": "g"
+      },
+      {
+        "name": "café ",
+        "quantity": 2.0,
+        "unit": "tasses"
+      },
+      {
+        "name": "amaretto",
+        "quantity": 1.0,
+        "unit": "càS"
+      },
+      {
+        "name": "cacao en poudre non sucré ",
+        "quantity": 30.0,
+        "unit": "g"
+      },
+      {
+        "name": "mascarpone",
+        "quantity": 250.0,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Faire un ruban avec les jaunes d'oeufs, le sucre et le sucre vanillé.",
+      "Y ajouter le mascarpone.",
+      "Battre les blancs en neige, les incorporer délicatement au mélange.",
+      "Ajouter l'amaretto au café noir.",
+      "Monter le gâteau: tremper, au fur et à mesure, les speculoos dans le café (attention à ne pas les \"détremper\").",
+      "Dans un plat, mettre une couche de biscuits, ensuite une couche de crème au mascarpone. Ensuite une autre couche de biscuits, et terminer par une couche de crème.",
+      "Saupoudrer de cacao, couvrir d'un film plastique et mettre au réfrigérateur quelques heures."
+    ],
+    "imageId": "images/tiramisu-aux-speculoos.webp",
+    "createdAt": "2025-03-24",
+    "updatedAt": "2025-03-25T13:24:02.623725"
+  },
+  {
+    "id": "recipe_cookies_au_parmesan",
+    "title": "Cookies au parmesan",
+    "description": "",
+    "prepTime": 15,
+    "cookTime": 30,
+    "servings": 8,
+    "category": "Apéritif",
+    "tags": [
+      "Apéritif"
+    ],
+    "ingredients": [
+      {
+        "name": "farine",
+        "quantity": 75.0,
+        "unit": "g"
+      },
+      {
+        "name": "parmesan",
+        "quantity": 100.0,
+        "unit": "g"
+      },
+      {
+        "name": "oeuf",
+        "quantity": 1.0,
+        "unit": ""
+      },
+      {
+        "name": "beurre",
+        "quantity": 40.0,
+        "unit": "g"
+      },
+      {
+        "name": "persil",
+        "quantity": 2.0,
+        "unit": "càS"
+      },
+      {
+        "name": "levure chimique",
+        "quantity": 1.0,
+        "unit": "càc"
+      },
+      {
+        "name": "sel",
+        "quantity": 1.0,
+        "unit": "pincée"
+      }
+    ],
+    "steps": [
+      "Préchauffez le four à 210°C.",
+      "Mélangez la farine, la levure et le sel dans un saladier.",
+      "Ajoutez le parmesan râpé, le persil haché, l'oeuf et le beurre fondu puis mélangez bien jusqu'à obtenir une pâte bien homogène.",
+      "Chemisez une plaque de four avec du papier sulfurisé.",
+      "Formez des cookies à l'aide de deux cuillères à soupe et placez-les sur la plaque de four.",
+      "Aplatissez-les légèrement avec le dos d'une cuillère.",
+      "Enfournez pendant 10 minutes jusqu'à ce que les cookies soient dorés.",
+      "Laissez refroidir sur une grille à la sortie du four.",
+      "Décollez les cookies et placez-les dans une boîte hermétique jusqu'à la dégustation."
+    ],
+    "imageId": "images/cookies-au-parmesan.webp",
+    "createdAt": "2025-03-22",
+    "updatedAt": "2025-03-22T16:46:10.476128"
+  },
+  {
+    "id": "recipe_bolognaise_de_lentilles",
+    "title": "BOLOGNAISE DE LENTILLES",
+    "description": "Ce grand classique revu à la sauce végétarienne est tout aussi délicieux que la version à base de viande.\nL'association des pâtes et des lentilles permet, comme tous les mariages céréales-légumineuses, de réunir l'ensemble des acides aminés nécessaires à la bonne assimilation des protéines végétales. Cette recette peut également servir de base à la réalisation de lasagnes à la bolognaise ou d'un hachis parmentier végétariens !",
+    "prepTime": 15,
+    "cookTime": 30,
+    "servings": 8,
+    "category": "Plat",
+    "tags": [
+      "Plat"
+    ],
+    "ingredients": [
+      {
+        "name": "carotte",
+        "quantity": 2.0,
+        "unit": ""
+      },
+      {
+        "name": "branches de céleri",
+        "quantity": 2.0,
+        "unit": ""
+      },
+      {
+        "name": "oignon",
+        "quantity": 2.0,
+        "unit": ""
+      },
+      {
+        "name": "ail",
+        "quantity": 2.0,
+        "unit": "gousse"
+      },
+      {
+        "name": "vin rouge",
+        "quantity": 120.0,
+        "unit": "g"
+      },
+      {
+        "name": "lentilles",
+        "quantity": 150.0,
+        "unit": "g"
+      },
+      {
+        "name": "tomates concassées",
+        "quantity": 800.0,
+        "unit": "g"
+      },
+      {
+        "name": "Huile d'olive",
+        "quantity": 30.0,
+        "unit": "g"
+      },
+      {
+        "name": "basilic séché",
+        "quantity": 1.0,
+        "unit": "càc"
+      },
+      {
+        "name": "origan",
+        "quantity": 1.0,
+        "unit": "càc"
+      },
+      {
+        "name": "laurier",
+        "quantity": 2.0,
+        "unit": "feuille"
+      }
+    ],
+    "steps": [
+      "Épluchez 2 carottes et coupez 2 branches de céleri en tronçons. Placez-les dans le bol, ainsi que 2 oignons coupés en deux et 2 gousses d'ail. Hachez 5 secondes/vitesse 5, puis ajoutez 30 g d'huile d'olive et faites revenir 6 minutes/120 °C (TM5) ou Varoma (TM31)/sens inverse/vitesse I, sans gobelet.",
+      "Ajoutez 120 g de vin rouge et faites réduire sans gobelet, 6 minutes/120 °C (TM5) ou Varoma (TM31)/sens inverse/vitesse I sans gobelet.",
+      "Ajoutez 150 g de lentilles, 800 g de tomates concassées, I c. à café de sel et quelques tours de moulin à poivre, quelques feuilles de basilic, I c. à café d'origan et 2 feuilles de laurier. Réglez 30 minutes (ou le temps de cuisson recommandé pour les lentilles)/100 °C/sens inverse/vitesse 1.",
+      "Si vous servez avec des pâtes, 15 minutes avant la fin de la cuisson faites chauffer une grande casserole d'eau salée et faites-y cuire les pâtes afin qu'elles soient prêtes au même moment que la sauce bolognaise.",
+      "À la fin de la minuterie du Thermomix, vérifiez la cuisson des lentilles et l'assaisonnement.",
+      "Parsemez quelques feuilles de basilic et servez avec du parmesan ou du parmesan végétal (voir notes page 218) et les pâtes de votre choix."
+    ],
+    "imageId": "images/bolognaise-de-lentilles.webp",
+    "createdAt": "2025-04-16",
+    "updatedAt": "2025-04-16T18:17:44.164739"
+  },
+  {
+    "id": "recipe_muffins_ultra_moelleux",
+    "title": "Muffins ultra moelleux",
+    "description": "",
+    "prepTime": 15,
+    "cookTime": 30,
+    "servings": 6,
+    "category": "Plat",
+    "tags": [
+      "Plat"
+    ],
+    "ingredients": [
+      {
+        "name": "farine",
+        "quantity": 190.0,
+        "unit": "g"
+      },
+      {
+        "name": "levure chimique",
+        "quantity": 0.5,
+        "unit": "sachet"
+      },
+      {
+        "name": "sel",
+        "quantity": 1.0,
+        "unit": "pincée"
+      },
+      {
+        "name": "oeuf",
+        "quantity": 1.0,
+        "unit": ""
+      },
+      {
+        "name": "sucre",
+        "quantity": 90.0,
+        "unit": "g"
+      },
+      {
+        "name": "lait",
+        "quantity": 120.0,
+        "unit": "mL"
+      },
+      {
+        "name": "beurre",
+        "quantity": 80.0,
+        "unit": "g"
+      },
+      {
+        "name": "vanille",
+        "quantity": 1.0,
+        "unit": "càc"
+      },
+      {
+        "name": "Pépites chocolat",
+        "quantity": 100.0,
+        "unit": "g"
+      },
+      {
+        "name": "nutella",
+        "quantity": 0.0,
+        "unit": ""
+      }
+    ],
+    "steps": [
+      "Préchauffer le four à 220°C.",
+      "Mélanger ensemble la farine, la levure et le sel et réserver.",
+      "Dans un récipient, mélanger l’œuf et le sucre à l’aide d’une maryse ou d’une cuillère en bois.",
+      "Ajouter le lait, le beurre fondu, la vanille liquide, puis le mélange farine/levure/sel en mélangeant bien après chaque ajout.",
+      "Garder une poignée de pépites de chocolat de côté et incorporer le reste à la préparation.",
+      "Verser la pâte dans des moules à muffins.",
+      "Répartir ensuite les pépites de chocolat laissées de côté sur le dessus des muffins.",
+      "Faire cuire 5 minutes à 220°C, puis diminuer la température à 180°C et laisser cuire encore 15 minutes.",
+      "Sortir du four et laisser refroidir.",
+      "A l’aide d’une seringue, faites fondre le nutella quelques secondes au micro-ondes et fourrer vos muffins."
+    ],
+    "imageId": "images/muffins-ultra-moelleux.webp",
+    "createdAt": "2025-07-15",
+    "updatedAt": "2025-07-17T10:25:10.031213"
+  },
+  {
+    "id": "recipe_cookies",
+    "title": "Cookies",
+    "description": "",
+    "prepTime": 10,
+    "cookTime": 0,
+    "servings": 10,
+    "category": "Dessert",
+    "tags": [
+      "Dessert"
+    ],
+    "ingredients": [
+      {
+        "name": "oeuf",
+        "quantity": 1.0,
+        "unit": ""
+      },
+      {
+        "name": "farine",
+        "quantity": 150.0,
+        "unit": "g"
+      },
+      {
+        "name": "sucre roux",
+        "quantity": 65.0,
+        "unit": "g"
+      },
+      {
+        "name": "levure",
+        "quantity": 1.0,
+        "unit": "sachet"
+      },
+      {
+        "name": "sucre vanillé",
+        "quantity": 1.0,
+        "unit": "sachet"
+      },
+      {
+        "name": "bicarbonate de soude",
+        "quantity": 1.0,
+        "unit": "pincée"
+      },
+      {
+        "name": "chocolat noir",
+        "quantity": 150.0,
+        "unit": "g"
+      },
+      {
+        "name": "beurre",
+        "quantity": 65.0,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Tout mélanger sauf les pépites jusqu'à obtenir une pâte sablée",
+      "Rajouter les pépites",
+      "Dans four préchauffé à 200 degrés, mettre les cookies 8min (les sortir même s'ils paraissent pas cuits, ils continuent de cuire dehors)",
+      "Mettre sur une grille pour qu'ils refroidissent"
+    ],
+    "imageId": "images/cookies.webp",
+    "createdAt": "2025-03-22",
+    "updatedAt": "2025-07-26T11:49:15.563780"
+  },
+  {
+    "id": "recipe_pancakes",
+    "title": "PANCAKES",
+    "description": "Pancakes recipe",
+    "prepTime": 15,
+    "cookTime": 30,
+    "servings": 4,
+    "category": "Plat",
+    "tags": [
+      "Plat"
+    ],
+    "ingredients": [
+      {
+        "name": "oeuf",
+        "quantity": 2.0,
+        "unit": ""
+      },
+      {
+        "name": "farine",
+        "quantity": 250.0,
+        "unit": "g"
+      },
+      {
+        "name": "lait",
+        "quantity": 300.0,
+        "unit": "mg"
+      },
+      {
+        "name": "levure",
+        "quantity": 1.0,
+        "unit": "sachet"
+      },
+      {
+        "name": "beurre",
+        "quantity": 65.0,
+        "unit": "g"
+      },
+      {
+        "name": "sucre",
+        "quantity": 30.0,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Mélanger la farine, la levure et le sucre.",
+      "Ajouter les oeufs et mélanger, puis rajouter le beurre fondu. Verser le lait petit à petit pour éviter les grumeaux. Laisser au frais le temps de chauffer la poêle avec un peu d'huile.",
+      "Cuire comme des petites crêpes (en retournant rapidement quand la poêle est chaude, même si le côté est encore cru). Pas besoin d'huiler entre chaque fournée."
+    ],
+    "imageId": "images/pancakes.webp",
+    "createdAt": "2025-05-24",
+    "updatedAt": "2025-05-24T07:07:54.646874"
+  },
+  {
+    "id": "recipe_pate_a_pizza",
+    "title": "Pâte à pizza",
+    "description": "Recette de pâte à pizza",
+    "prepTime": 15,
+    "cookTime": 30,
+    "servings": 1,
+    "category": "Plat",
+    "tags": [
+      "Plat"
+    ],
+    "ingredients": [
+      {
+        "name": "eau",
+        "quantity": 160.0,
+        "unit": "mL"
+      },
+      {
+        "name": "Huile d'olive",
+        "quantity": 1.0,
+        "unit": "càS"
+      },
+      {
+        "name": "sel",
+        "quantity": 0.5,
+        "unit": "càc"
+      },
+      {
+        "name": "Farine T55",
+        "quantity": 320.0,
+        "unit": "g"
+      },
+      {
+        "name": "levure",
+        "quantity": 0.5,
+        "unit": "càc"
+      }
+    ],
+    "steps": [
+      "Tout melanger",
+      "Laisser reposer un max",
+      "7 min au four 300° (plaque non chaude)\n6 min au four 300° (plaque chaude)"
+    ],
+    "imageId": "images/pate-a-pizza.webp",
+    "createdAt": "2025-04-04",
+    "updatedAt": "2025-04-05T13:47:22.277405"
+  },
+  {
+    "id": "recipe_cookie_geant_aux_pepites_de_chocolat",
+    "title": "Cookie géant aux pépites de chocolat",
+    "description": "Connaissez-vous le gâteau comme un cookie géant au chocolat de Guillemette ? Je suis tombée par hasard sur cette recette que j’ai testée sans attendre. Une belle gourmandise que vos enfants vont adorer. Attention, c’est quand même très sucré.",
+    "prepTime": 15,
+    "cookTime": 30,
+    "servings": 8,
+    "category": "Plat",
+    "tags": [
+      "Plat"
+    ],
+    "ingredients": [
+      {
+        "name": "farine",
+        "quantity": 180.0,
+        "unit": "g"
+      },
+      {
+        "name": "sucre roux",
+        "quantity": 100.0,
+        "unit": "g"
+      },
+      {
+        "name": "Beurre mou",
+        "quantity": 80.0,
+        "unit": "g"
+      },
+      {
+        "name": "oeuf",
+        "quantity": 1.0,
+        "unit": ""
+      },
+      {
+        "name": "Pépites chocolat",
+        "quantity": 150.0,
+        "unit": "g"
+      },
+      {
+        "name": "levure chimique",
+        "quantity": 1.0,
+        "unit": "paquet"
+      }
+    ],
+    "steps": [
+      "1. Préchauffez le four à 180°C.",
+      "2. Mettez le beurre et le sucre dans un saladier ou dans le bol d’un robot. Mélangez bien pour obtenir une texture onctueuse.",
+      "3. Incorporez l’oeuf puis la farine et la levure.",
+      "4. Ajoutez les pépites de chocolat et mélangez sans trop travailler la pâte.",
+      "5. Mettez la pâte à cookies dans un moule à manqué d’environ 20 cm de diamètre.",
+      "6. Faites cuire 18 min à 180°C.\n(original : 15 min)"
+    ],
+    "imageId": "images/cookie-geant-aux-pepites-de-chocolat.webp",
+    "createdAt": "2025-04-05",
+    "updatedAt": "2025-05-26T17:45:11.222431"
+  },
+  {
+    "id": "recipe_fondant_chocolat",
+    "title": "Fondant chocolat",
+    "description": "",
+    "prepTime": 15,
+    "cookTime": 30,
+    "servings": 4,
+    "category": "Plat",
+    "tags": [
+      "Plat"
+    ],
+    "ingredients": [
+      {
+        "name": "chocolat noir",
+        "quantity": 200.0,
+        "unit": "g"
+      },
+      {
+        "name": "oeuf",
+        "quantity": 5.0,
+        "unit": ""
+      },
+      {
+        "name": "Beurre salé",
+        "quantity": 90.0,
+        "unit": "g"
+      },
+      {
+        "name": "sucre",
+        "quantity": 90.0,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Faire fondre au micro onde chocolat + beurre\nAttendre que le mélange refroidisse vitef \nRajouter le sucre (tamisé si tu veux faire fancy)\nRajouter les 5 oeufs entiers\n\nClaquer tout ça dans un plat\n\n180 degrès au four 15min si coulant, 18 min si moy moy coulant"
+    ],
+    "imageId": "",
+    "createdAt": "2025-05-18",
+    "updatedAt": "2025-06-11T15:42:45.044393"
+  },
+  {
+    "id": "recipe_granola_grosses_pepites",
+    "title": "Granola grosses pépites",
+    "description": "",
+    "prepTime": 15,
+    "cookTime": 30,
+    "servings": 4,
+    "category": "Plat",
+    "tags": [
+      "Plat"
+    ],
+    "ingredients": [
+      {
+        "name": "Flocons d'avoine ",
+        "quantity": 800.0,
+        "unit": "g"
+      },
+      {
+        "name": "Oléagineux (amandes...)",
+        "quantity": 400.0,
+        "unit": "g"
+      },
+      {
+        "name": "Sirop d'agave ",
+        "quantity": 150.0,
+        "unit": "g"
+      },
+      {
+        "name": "Sirop d'érable ",
+        "quantity": 150.0,
+        "unit": "Grammes"
+      },
+      {
+        "name": "Miel",
+        "quantity": 50.0,
+        "unit": "Grammes"
+      },
+      {
+        "name": "",
+        "quantity": 1.0,
+        "unit": ""
+      }
+    ],
+    "steps": [
+      "Concasse les oléagineux\nMélange tout avec tout pr que ça s'enrobe bien\nClaque ça en couche épaisse sur une plaque\nFour à 180 degrés mode air fryer \nEntre 10 et 13 min \nLaisser refroidir biiiiien\nPas casser la plaque et la mettre dans un pot, paf ça fait des chocapics"
+    ],
+    "imageId": "",
+    "createdAt": "2025-06-11",
+    "updatedAt": "2025-06-11T15:52:18.736540"
+  },
+  {
+    "id": "recipe_brownie",
+    "title": "Brownie",
+    "description": "",
+    "prepTime": 15,
+    "cookTime": 30,
+    "servings": 4,
+    "category": "Plat",
+    "tags": [
+      "Plat"
+    ],
+    "ingredients": [
+      {
+        "name": "Chocolat lait",
+        "quantity": 350.0,
+        "unit": "g"
+      },
+      {
+        "name": "Beurre salé",
+        "quantity": 150.0,
+        "unit": "g"
+      },
+      {
+        "name": "Sucre roux",
+        "quantity": 150.0,
+        "unit": "g"
+      },
+      {
+        "name": "Oeufs entiers",
+        "quantity": 4.0,
+        "unit": ""
+      },
+      {
+        "name": "farine",
+        "quantity": 125.0,
+        "unit": "g"
+      },
+      {
+        "name": "Noix concassés",
+        "quantity": 100.0,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Beurre + chocolat fondus au micro-onde\nDans un plat, blanchir oeufs entiers + sucre\nRajouter le mélange chocolat fondu (pas trop chaud pr que ça ne cuise pas)\n+ farine + sucre\n+ rajouter les noix concassés grossièrement \n\nAu four 200 degrès 25 min"
+    ],
+    "imageId": "",
+    "createdAt": "2025-12-19",
+    "updatedAt": "2025-12-19T18:46:08.578513"
+  },
+  {
+    "id": "recipe_cake_a_la_banane_facile_et_rapide",
+    "title": "Cake à la banane facile et rapide",
+    "description": "farine, sucre, banane, beurre, levure chimique, sel, oeuf, lait",
+    "prepTime": 15,
+    "cookTime": 30,
+    "servings": 4,
+    "category": "Plat",
+    "tags": [
+      "Plat"
+    ],
+    "ingredients": [
+      {
+        "name": "farine",
+        "quantity": 200.0,
+        "unit": "g"
+      },
+      {
+        "name": "sucre",
+        "quantity": 80.0,
+        "unit": "g"
+      },
+      {
+        "name": "bananes",
+        "quantity": 3.0,
+        "unit": ""
+      },
+      {
+        "name": "levure chimique",
+        "quantity": 0.5,
+        "unit": ""
+      },
+      {
+        "name": "sel",
+        "quantity": 1.0,
+        "unit": "pincée"
+      },
+      {
+        "name": "oeuf",
+        "quantity": 1.0,
+        "unit": ""
+      },
+      {
+        "name": "lait",
+        "quantity": 10.0,
+        "unit": "cL"
+      },
+      {
+        "name": "beurre",
+        "quantity": 30.0,
+        "unit": "g"
+      },
+      {
+        "name": "Pépites chocolat",
+        "quantity": 200.0,
+        "unit": "g"
+      },
+      {
+        "name": "Cannelle",
+        "quantity": 3.0,
+        "unit": "càS"
+      }
+    ],
+    "steps": [
+      "Mettre la farine dans un saladier avec la levure, ajouter une pincée de sel.",
+      "Dans un autre saladier mettre le sucre, l'oeuf, le beurre fondu, puis le lait.",
+      "Ecraser les bananes dans un bol à part.",
+      "Incorporer les bananes écrasées au précédent mélange (sucre, oeuf, beurre et lait). Bien mélanger au fouet électrique.",
+      "Verser le préparation dans le premier saladier contenant les ingrédients secs, et mélanger de nouveau.",
+      "Mettre dans un moule à cake.",
+      "Cuire pendant 45 min environ à 180°C."
+    ],
+    "imageId": "images/cake-a-la-banane-facile-et-rapide.webp",
+    "createdAt": "2025-03-22",
+    "updatedAt": "2025-12-19T18:48:15.341340"
+  },
+  {
+    "id": "recipe_recette_ganache_montee_facile_et_inratable_astuces",
+    "title": "[Recette] Ganache Montée Facile et Inratable + Astuces !",
+    "description": "Découvrez comment réaliser facilement une ganache montée au chocolat sans vous tromper grâce à ma recette pas à pas. Vous ne pourrez pas la rater !",
+    "prepTime": 15,
+    "cookTime": 30,
+    "servings": 600,
+    "category": "Plat",
+    "tags": [
+      "Plat"
+    ],
+    "ingredients": [
+      {
+        "name": "",
+        "quantity": 0.0,
+        "unit": ""
+      },
+      {
+        "name": "",
+        "quantity": 0.0,
+        "unit": ""
+      },
+      {
+        "name": "",
+        "quantity": 0.0,
+        "unit": ""
+      }
+    ],
+    "steps": [
+      "On commence en faisant une ganache au chocolat “comme d’habitude”, à savoir en faisant fondre le chocolat au Bain-Marie ou au micro-onde à basse température.",
+      "Faites bouillir la première partie de la crème liquide entière (celle “à bouillir”) dans une casserole.",
+      "Versez 1/3 de la crème liquide entière bouillie sur le chocolat fondu et faites une émulsion en mélangeant vivement à l’aide d’une maryse à partir du centre du saladier.",
+      "Faites de même avec le 2ème puis le dernier tiers de la crème liquide entière bouillie, en faisant attention à bien incorporer tout le gras de la crème si se trouve sur les parois de la casserole (ce que l’on appelle souvent “La peau”).",
+      "Une fois la ganache au chocolat “classique” bien émulsionnée (on a donc un mélange homogène et bien brillant), on ajoute la crème liquide entière froide (celle “à froid”) et on remélange bien le tout.",
+      "On laisse la ganache refroidir à température ambiante (si nécessaire, si elle est encore trop chaude) et on la met au réfrigérateur pendant plusieurs heures (le mieux étant une nuit).",
+      "Après avoir mis le bol (pas celui de la ganache !) et le fouet de son robot au congélateur au moins 15 minutes au préalable (cela permet de mieux monter la crème liquide entière), on verse la ganache dans le bol du robot et on fouette doucement pendant 10 minutes environ pour la foisonner. Le but est d’incorporer le plus d’air possible, mais attention à ne pas fouetter trop vite ou trop longtemps sous risque de faire grainer/trancher votre Ganache Montée."
+    ],
+    "imageId": "images/recette-ganache-montee-facile-et-inratable-astuces.webp",
+    "createdAt": "2026-01-04",
+    "updatedAt": "2026-01-04T10:09:23.611745"
+  },
+  {
+    "id": "recipe_poulet_roti",
+    "title": "Poulet rôti",
+    "description": "",
+    "prepTime": 15,
+    "cookTime": 30,
+    "servings": 4,
+    "category": "Plat",
+    "tags": [
+      "Plat"
+    ],
+    "ingredients": [],
+    "steps": [
+      "Badigeonner le poulet d'huile d'olive sur toutes les faces\nPuis assaisonner : paprika, curry, herbes de provence\nCouper les oignons et l'ail pour les mettre dans le plat \nAjouter une feuille de laurier\n400mL d'eau + 2 cubes dans le plat\nArroser toutes les 20min. Si plus de sauce >> eau + bouillon dilué ou eau seule\n1h sur le dos puis le reste sur le ventre\n\n1h de cuisson par kg de poulet \nFour à 180 degrés"
+    ],
+    "imageId": "",
+    "createdAt": "2025-12-19",
+    "updatedAt": "2026-01-10T15:25:02.930759"
+  },
+  {
+    "id": "recipe_cramiques",
+    "title": "Cramiques",
+    "description": "",
+    "prepTime": 15,
+    "cookTime": 30,
+    "servings": 5,
+    "category": "Dessert",
+    "tags": [
+      "Dessert"
+    ],
+    "ingredients": [
+      {
+        "name": "farine",
+        "quantity": 840.0,
+        "unit": "g"
+      },
+      {
+        "name": "sucre",
+        "quantity": 200.0,
+        "unit": "g"
+      },
+      {
+        "name": "beurre",
+        "quantity": 60.0,
+        "unit": "g"
+      },
+      {
+        "name": "oeuf",
+        "quantity": 2.0,
+        "unit": ""
+      },
+      {
+        "name": "lait",
+        "quantity": 500.0,
+        "unit": "mL"
+      },
+      {
+        "name": "Pépites chocolat",
+        "quantity": 300.0,
+        "unit": "g"
+      },
+      {
+        "name": "levure boulangère ",
+        "quantity": 10.0,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Lait tiède + levure + sucre puis mélanger",
+      "Ajouter farine + œufs entiers puis mélanger",
+      "Ajouter beurre à température ambiante puis mélanger",
+      "Fariner le plan de travail et pétrir dessus 5min. Laisser sur le plan de travail en boule (moyennement collante) avec torchon dessus 10min",
+      "Étaler rapidement à la main et mettre des pépites. Pétrir et former une boule. Repos 1h sous torchon dans le plat",
+      "Faire des pâtons de 350g en boule. Laisser reposer sur le plat à four 30min",
+      "Badigeonner 2 jaunes d’œufs + un peu de lait et inciser la pate",
+      "Cuire 20-25min à 160degres"
+    ],
+    "imageId": "images/cramiques.webp",
+    "createdAt": "2025-09-14",
+    "updatedAt": "2025-09-16T13:31:55.723292"
+  },
+  {
+    "id": "recipe_cake_sale",
+    "title": "Cake salé",
+    "description": "",
+    "prepTime": 15,
+    "cookTime": 30,
+    "servings": 4,
+    "category": "Plat",
+    "tags": [
+      "Plat"
+    ],
+    "ingredients": [
+      {
+        "name": "farine",
+        "quantity": 200.0,
+        "unit": "g"
+      },
+      {
+        "name": "Oeufs entiers",
+        "quantity": 3.0,
+        "unit": ""
+      },
+      {
+        "name": "Huile d'olive",
+        "quantity": 3.0,
+        "unit": "cL"
+      },
+      {
+        "name": "levure chimique",
+        "quantity": 1.0,
+        "unit": ""
+      },
+      {
+        "name": "Emmental",
+        "quantity": 100.0,
+        "unit": "g"
+      },
+      {
+        "name": "lait",
+        "quantity": 10.0,
+        "unit": "cL"
+      }
+    ],
+    "steps": [
+      "Tout mélanger\nRajouter les ingrédients qu'on veut (courgettes / chèvre / olive, olive / jambon / comté...)\nCuire 40min à 180 degrés"
+    ],
+    "imageId": "",
+    "createdAt": "2025-11-15",
+    "updatedAt": "2026-02-20T11:18:55.059386"
+  },
+  {
+    "id": "recipe_amandier",
+    "title": "Amandier",
+    "description": "",
+    "prepTime": 15,
+    "cookTime": 30,
+    "servings": 4,
+    "category": "Plat",
+    "tags": [
+      "Plat"
+    ],
+    "ingredients": [
+      {
+        "name": "Poudre amande",
+        "quantity": 200.0,
+        "unit": "Grammes"
+      },
+      {
+        "name": "Oeufs entiers",
+        "quantity": 3.0,
+        "unit": ""
+      },
+      {
+        "name": "sucre",
+        "quantity": 150.0,
+        "unit": "g"
+      },
+      {
+        "name": "Amande amère ",
+        "quantity": 2.0,
+        "unit": "càS"
+      },
+      {
+        "name": "Beurre fondu",
+        "quantity": 150.0,
+        "unit": "Grammes"
+      },
+      {
+        "name": "Rhum",
+        "quantity": null,
+        "unit": ""
+      }
+    ],
+    "steps": [
+      "Battre les oeufs entiers avec le sucre \nRajouter la poudre d'amande, l'amande amère et le beurre fondu",
+      "Au four 30 min à 180 degrés"
+    ],
+    "imageId": "",
+    "createdAt": "2025-08-24",
+    "updatedAt": "2026-03-06T20:32:00.157555"
+  },
+  {
+    "id": "recipe_ganache_montee",
+    "title": "Ganache Montée",
+    "description": "Découvrez comment réaliser facilement une ganache montée au chocolat sans vous tromper grâce à ma recette pas à pas. Vous ne pourrez pas la rater !",
+    "prepTime": 15,
+    "cookTime": 30,
+    "servings": 600,
+    "category": "Plat",
+    "tags": [
+      "Plat"
+    ],
+    "ingredients": [
+      {
+        "name": "chocolat noir",
+        "quantity": 150.0,
+        "unit": "g"
+      },
+      {
+        "name": "Crème liquide",
+        "quantity": 150.0,
+        "unit": "g"
+      },
+      {
+        "name": "Crème liquide",
+        "quantity": 300.0,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "On commence en faisant une ganache au chocolat “comme d’habitude”, à savoir en faisant fondre le chocolat au Bain-Marie ou au micro-onde à basse température.",
+      "Faites bouillir la première partie de la crème liquide entière (celle “à bouillir”) dans une casserole.",
+      "Versez 1/3 de la crème liquide entière bouillie sur le chocolat fondu et faites une émulsion en mélangeant vivement à l’aide d’une maryse à partir du centre du saladier.",
+      "Faites de même avec le 2ème puis le dernier tiers de la crème liquide entière bouillie, en faisant attention à bien incorporer tout le gras de la crème si se trouve sur les parois de la casserole (ce que l’on appelle souvent “La peau”).",
+      "Une fois la ganache au chocolat “classique” bien émulsionnée (on a donc un mélange homogène et bien brillant), on ajoute la crème liquide entière froide (celle “à froid”) et on remélange bien le tout.",
+      "On laisse la ganache refroidir à température ambiante (si nécessaire, si elle est encore trop chaude) et on la met au réfrigérateur pendant plusieurs heures (le mieux étant une nuit).",
+      "Après avoir mis le bol (pas celui de la ganache !) et le fouet de son robot au congélateur au moins 15 minutes au préalable (cela permet de mieux monter la crème liquide entière), on verse la ganache dans le bol du robot et on fouette doucement pendant 10 minutes environ pour la foisonner. Le but est d’incorporer le plus d’air possible, mais attention à ne pas fouetter trop vite ou trop longtemps sous risque de faire grainer/trancher votre Ganache Montée."
+    ],
+    "imageId": "images/ganache-montee.webp",
+    "createdAt": "2026-01-04",
+    "updatedAt": "2026-01-04T10:29:07.714118"
+  },
+  {
+    "id": "recipe_la_recette_de_la_pate_a_choux",
+    "title": "La Recette de la Pâte à Choux",
+    "description": "Une pâte à choux dorée, gonflée, craquante à l'extérieur et moelleuse ? Je vous explique tout pour l'obtenir !",
+    "prepTime": 15,
+    "cookTime": 30,
+    "servings": 650,
+    "category": "Plat",
+    "tags": [
+      "Plat"
+    ],
+    "ingredients": [
+      {
+        "name": "eau",
+        "quantity": 125.0,
+        "unit": "g"
+      },
+      {
+        "name": "lait",
+        "quantity": 125.0,
+        "unit": "g"
+      },
+      {
+        "name": "Beurre doux",
+        "quantity": 50.0,
+        "unit": "g"
+      },
+      {
+        "name": "Beurre demi-sel",
+        "quantity": 50.0,
+        "unit": "g"
+      },
+      {
+        "name": "Farine",
+        "quantity": 150.0,
+        "unit": "g"
+      },
+      {
+        "name": "Oeufs",
+        "quantity": 250.0,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Dans une casserole, mettez l’eau, le lait et les deux beurres coupés en petits morceaux. Faites chauffer à feu moyen le tout afin de faire fondre entièrement les deux beurres.",
+      "Une fois les beurres entièrement fondus, faites bouillir le contenu de la casserole.\nIl est important de ne pas faire bouillir trop tôt (avant que les beurres soient fondus) afin de ne pas perdre trop de liquide en évaporation au préalable, sinon on se retrouverait avec un souci de proportion des ingrédients.\n<img src=\"/api/media/recipes/e2f26a60-d373-42ea-a7f3-f2d5ce3136a0/assets/pateachoux-01-fontebeurres-gif.gif\" height=\"50%\" width=\"50%\"/>",
+      "Dès que le liquide boue (quand ça mousse et que ça commence à monter), sortez la casserole du feu immédiatement et ajoutez y en une seule fois la farine de blé. Mélangez de suite à l’aide d’une spatule pour éviter la formation de grumeaux. Votre geste doit être énergique, mais attention quand même à ne pas vous brûler au début du mélange (quand les liquides sont encore bien présents).\n<img src=\"/api/media/recipes/e2f26a60-d373-42ea-a7f3-f2d5ce3136a0/assets/pateachoux-02-ajoutfarine-gif.gif\" height=\"50%\" width=\"50%\"/>",
+      "Remettez la casserole sur un feu moyen en continuant de travailler la préparation avec votre spatule. Le but est d’obtenir une préparation compacte, lisse et homogène qui se détache de la casserole et de la spatule.\n\nPour ma part, je continue de bien travailler ma panade jusqu’à ce qu’un léger crépitement se fasse entendre (au bout d’1 minute généralement). C’est le son d’une “petite pellicule” qui s’est posée au fond de la casserole et qui m’indique que ma panade est prête. ^^<img src=\"/api/media/recipes/e2f26a60-d373-42ea-a7f3-f2d5ce3136a0/assets/pateachoux-03-chauffe-gif.gif\" height=\"50%\" width=\"50%\"/>",
+      "Mettez votre panade dans un saladier, écrasez la (pour qu’elle ne soit pas en boule) et laissez la tiédir légèrement pendant 1 minute.\n\nCette étape permettra que les oeufs ne cuisent pas dans une panade trop chaude, on ne veut pas d’oeuf mimosa ! ^^<img src=\"/api/media/recipes/e2f26a60-d373-42ea-a7f3-f2d5ce3136a0/assets/pateachoux-04-refroidissement-gif.gif\" height=\"50%\" width=\"50%\"/>",
+      "Pendant ce temps, préchauffez votre four à 200°C en convection naturelle, préparez votre plaque perforée recouverte de papier sulfurisé et votre poche à douille.\n\nSi ce n’est déjà fait, mélangez vos oeufs dans votre bol afin qu’ils soient en omelette. Cela permettra qu’ils soient plus simples à incorporer petit à petit.",
+      "Ajoutez une petite quantité d’oeuf à votre panade et mélangez à la spatule jusqu’à obtenir un résultat homogène. Au début, vous aurez un amas de morceaux gluants, c’est normal, il faut continuer de mélanger surtout ! On continue d’ajouter les oeufs petit à petit en les incoporant entièrement à chaque ajout.\n\nIl n’est pas obligatoire d’ajouter toute la quantité d’oeuf. Le but est d’obtenir une pâte à choux souple, donc pas dure, mais pas trop fluide non plus. On peut faire le test de tremper le bout du doigt sur la pâte, il faut qu’en retournant le doigt, la pâte tienne mais fasse un “petit bec” qui retombe légèrement.\n\nVous verrez des recettes où la pâte sera plus liquide, à en faire un ruban en continue. Pour ma part, je préfère cette texture un peu plus ferme car trop liquide, c’est difficile à pocher correctement je trouve.<img src=\"/api/media/recipes/e2f26a60-d373-42ea-a7f3-f2d5ce3136a0/assets/pateachoux-05-ajoutoeufs-gif.gif\" height=\"50%\" width=\"50%\"/>",
+      "Ne vous reste plus qu’à pocher votre pâte à choux en fonction de vos envies et de vos besoins. Pensez au fait que la pâte à choux gonfle à la cuisson, donc faites bien vos pochages en quinconce surtout.\n\nPour ma part, j’aime les pocher sur une feuille de papier sulfurisé posée sur une plaque perforée, ça permet que la chaleur passe bien lors de la cuisson.\n\nVous pouvez mettre 4 petits points de pâte sous chaque coin du papier sulfurisé pour éviter qu’il ne bouge lorsque vous pochez, c’est très pratique. Je ne le fais pas car je n’aime pas avoir des traces sur ma plaque, mais c’est moins facile… hihi ^^<img src=\"/api/media/recipes/e2f26a60-d373-42ea-a7f3-f2d5ce3136a0/assets/pateachoux-06-pochage-gif.gif\" height=\"50%\" width=\"50%\"/>\n\n\nJe ne fais pas le geste technique de “tourner” dans cette vidéo car j’enlève mes “pointes” en dorant mes choux ensuite. C’est plus simple à mon goût que de risquer un “mauvais pochage” à cause de ma feuille qui n’est pas collée, ce qui me ferait un choux tordu. ^^\n\nMais je vous montre plus bas comment faire “le geste technique du CAP” où il faut couper la pâte avec la douille bien entendu. 😉",
+      "A présent (si vous n’utilisez pas de craquelin), il ne vous reste plus qu’à les dorer pour obtenir une jolie coloration à la cuisson.\n\nPour ma part, j’utilise juste du lait car je trouve ça plus simple et j’aime la coloration claire obtenue. Mais je vous donne d’autres recettes pour dorer en bas de l’article.\n\nAttention, essayez d’éviter les coulures qui tomberaient sur le papier sulfurisé et bruleraient à la cuisson ensuite.<img src=\"/api/media/recipes/e2f26a60-d373-42ea-a7f3-f2d5ce3136a0/assets/pateachoux-07-dorure-gif.gif\" height=\"50%\" width=\"50%\"/>",
+      "Puis faites cuire votre pâte à choux selon votre recette."
+    ],
+    "imageId": "images/la-recette-de-la-pate-a-choux.webp",
+    "createdAt": "2026-01-04",
+    "updatedAt": "2026-01-04T10:51:36.971794"
+  },
+  {
+    "id": "recipe_wraps",
+    "title": "Wraps",
+    "description": "",
+    "prepTime": 15,
+    "cookTime": 30,
+    "servings": 12,
+    "category": "Plat",
+    "tags": [
+      "Plat"
+    ],
+    "ingredients": [
+      {
+        "name": "eau",
+        "quantity": 250.0,
+        "unit": "g"
+      },
+      {
+        "name": "Levure boulanger déshydratée",
+        "quantity": 7.0,
+        "unit": "g"
+      },
+      {
+        "name": "Sel",
+        "quantity": 1.5,
+        "unit": "càc"
+      },
+      {
+        "name": "farine",
+        "quantity": 500.0,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Mettre le pétrin\nMélanger dans l'ordre : eau, levure, farine et sel\n2min à vitesse 1\nPuis 8 min à vitesse 2\nLaisser reposer 10min sur plan de travail fariné\nCouper le paton en 12\nÉtaler en crêpes giga méga fine type feuille de cigarette \nDans une poêle chaude sans matière grasse : 30 sec. à 1 min. par face\nLaisser sous un torchon humidifié pour éviter qu'elles ne sèchent"
+    ],
+    "imageId": "",
+    "createdAt": "2026-02-25",
+    "updatedAt": "2026-03-01T18:26:41.271913"
+  },
+  {
+    "id": "recipe_amandier_aux_poires",
+    "title": "Amandier aux poires ",
+    "description": "",
+    "prepTime": 15,
+    "cookTime": 30,
+    "servings": 4,
+    "category": "Plat",
+    "tags": [
+      "Plat"
+    ],
+    "ingredients": [
+      {
+        "name": "",
+        "quantity": 4.0,
+        "unit": "Poires"
+      },
+      {
+        "name": "Poudre amande",
+        "quantity": 140.0,
+        "unit": "Grammes"
+      },
+      {
+        "name": "Farine",
+        "quantity": 80.0,
+        "unit": "g"
+      },
+      {
+        "name": "sucre",
+        "quantity": 120.0,
+        "unit": "g"
+      },
+      {
+        "name": "Oeufs entiers",
+        "quantity": 3.0,
+        "unit": ""
+      },
+      {
+        "name": "levure chimique",
+        "quantity": 1.0,
+        "unit": "sachet"
+      },
+      {
+        "name": "Rhum ambré",
+        "quantity": 0.0,
+        "unit": ""
+      }
+    ],
+    "steps": [
+      "Préchauffer le four à 180 degrès \n\nBlanchir ensemble les oeufs et le sucre\nAjouter le beurre fondu, le rhum, la poudre d'amande et la levure\n\nVerser la moitié de la pâte puis les poires épluchées / coupées puis re de la pâte \n\n40 à 50min au four"
+    ],
+    "imageId": "",
+    "createdAt": "2026-02-18",
+    "updatedAt": "2026-03-22T17:47:35.925877"
+  },
+  {
+    "id": "recipe_pate_feuilletee_express",
+    "title": "Pâte feuilletée express",
+    "description": "",
+    "prepTime": 15,
+    "cookTime": 30,
+    "servings": 4,
+    "category": "Plat",
+    "tags": [
+      "Plat"
+    ],
+    "ingredients": [
+      {
+        "name": "Farine",
+        "quantity": 250.0,
+        "unit": "g"
+      },
+      {
+        "name": "eau",
+        "quantity": 150.0,
+        "unit": "g"
+      },
+      {
+        "name": "Beurre demi-sel",
+        "quantity": 200.0,
+        "unit": "g"
+      }
+    ],
+    "steps": [
+      "Les étapes de la recette ainsi que les autres champs de la page de recette supportent la syntaxe Markdown.\n\n**Ajouter un lien**\n\n[Mon lien](https://demo.mealie.io)"
+    ],
+    "imageId": "",
+    "createdAt": "2026-01-10",
+    "updatedAt": "2026-03-22T17:49:50.911837"
+  }
+]
