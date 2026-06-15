@@ -32,7 +32,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 const app = {
-  version: '1.1.32',
+  version: '1.1.33',
   // --- Lifecyle ---
   async init() {
     this.registerServiceWorker();
@@ -280,6 +280,10 @@ const app = {
     const allIds = new Set([...localMap.keys(), ...remoteMap.keys()]);
     let hasChanges = false;
     
+    // Tombstone TTL: 60 days
+    const TOMBSTONE_TTL_MS = 60 * 24 * 60 * 60 * 1000;
+    const cutoffTime = Date.now() - TOMBSTONE_TTL_MS;
+    
     for (const id of allIds) {
       const local = localMap.get(id);
       const remote = remoteMap.get(id);
@@ -307,6 +311,15 @@ const app = {
       }
       
       if (selected) {
+        // Purge expired tombstones (deleted recipes older than 60 days)
+        if (selected.deleted) {
+          const selectedTime = new Date(selected.updatedAt || selected.createdAt || 0).getTime();
+          if (selectedTime < cutoffTime) {
+            hasChanges = true;
+            continue;
+          }
+        }
+        
         // Trigger local image cache cleanup if marked deleted remotely
         const localWasNotDeleted = !local || !local.deleted;
         if (selected.deleted && localWasNotDeleted) {
